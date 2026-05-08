@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginxdemo-deployment
+  labels:
+    app: nginxdemo
+spec:
+  #strategy:
+     #type: Recreate
+    #type: RollingUpdate
+
+  replicas: 4
+  selector:
+    matchLabels:
+      app: nginxdemo
+  template:
+    metadata:
+      labels:
+        app: nginxdemo
+    spec:
+      containers:
+      - name: nginxdemo
+        image: nginxdemos/hello:0.3 
+        ports:
+        - containerPort: 80

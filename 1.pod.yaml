@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nilesh
+  labels:
+    app: ordering
+    env: prod
+spec:
+  containers:
+    - name: nilesh-container
+      image: nginxdemos/hello
