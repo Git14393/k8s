@@ -1,0 +1,3813 @@
+TCS DevOps - B15 
+RJPLMS: https://www.rjpinfotek.com/course/devopsb15
+Ansible
+Day 6 - 27Apr26
+
+http://10.0.15.1 - etherpad link
+
+ https://12factor.net/
+ https://upload.wikimedia.org/wikipedia/commons/1/1b/Linux_Distribution_Timeline.svg
+ https://github.com/torvalds/linux
+ https://kernel.org/
+ https://distrowatch.com/
+ https://fedoraproject.org/
+ https://w3techs.com/technologies/details/os-linux
+ https://docs.ansible.com/projects/ansible/latest/getting_started/index.html
+ 
+linux credentials
+username: student / password: student
+username: root /  password: root123
+
+master - 10.0.15.1
+node1 - 10.0.15.2
+node2 - 10.0.15.3
+
+
+master - 10.0.15.x
+node1 - 10.0.15.y
+node2 - 10.0.15.z
+
+
+Command options arguments
+Linux terminal basics:
+    20  cal
+   21  cal 12 2026
+   22  cal 1 2026
+   23  cal 2026
+   24  cal -3 6 2026
+   25  cal --help
+   26  cal -3m 6 2026
+  28  date
+   29  date --help
+   30  date +%A
+   31  date +%a
+   32  date +%D
+   33  date +%d/%m/%y
+   34  date +%d/%m/%Y
+   36  man wc
+   37  wc /etc/passwd
+   38  wc -l /etc/passwd
+   39  cal > apr26.txt
+   40  ls 
+   41  ls -l
+   42  cat apr26.txt 
+   43  head -3 apr26.txt 
+   44  tail -3 apr26.txt 
+   45  tac apr26.txt 
+   
+   8
+   LAB: Rename node1 & node2
+   su -
+   33  hostnamectl hostname node1
+   34  hostnamectl
+   ctrl+D
+
+LAB: create / update - /etc/hosts file for local name resolution
+
+10.0.15.x  master
+10.0.15.y node1 
+10.0.15.z node2
+
+done: shaj,Elizabeth,Sandeep,Bhavitha,Prince Melkias, Hemant,Girish,Greeshma,Ashwini putty,Nilesh,Aswin,Naresh,raghu,rakshith,sharif,priyanka
+
+
+LAB: create devops user and grant sudo permission on node1 and node2
+su - nodex
+useradd devops
+passwd devops
+
+create/add /etc/sudoers.d/admins 
+#prompt password evry time with sudo
+student ALL=(ALL) ALL
+
+#don't prompt the password for devops user with sudo
+xit
+
+
+done:Girish,Sandeep,sharif,Elizabeth, Ashwini putty,Naresh,Bhavitha,Prince Melkias,Hemant,Aswin,Nilesh,raghu,greeshma,priyanka,Rakshith
+
+
+Install Ansible
+
+https://docs.ansible.com/projects/ansible/latest/index.html
+https://docs.ansible.com/projects/ansible/latest/installation_guide/index.html
+
+    
+LAB: Install ansible in MASTER 
+https://docs.ansible.com/projects/ansible/latest/installation_guide/installation_distros.html#installing-ansible-on-fedora-linux
+$ sudo dnf install ansible
+
+Done:Sandeep,priyanka,raghu,Nilesh,Prince Melkias,Hemant,Ashwini putty,Elizabeth,Greeshma,Aswin,Bhavitha,Naresh,Rakshith
+    
+    
+Ansible’s community packages are distributed in two ways:
+
+    ansible-core: a minimalist language and runtime package containing a set of built-in modules and plugins.
+
+    ansible: a much larger “batteries included” package, which adds a community-curated selection of Ansible Collections for automating a wide variety of devices.
+
+
+ansible --version
+ansible [core 2.14.18]
+  config file = /etc/ansible/ansible.cfg
+  configured module search path = ['/home/student/.ansible/plugins/modules', '/usr/share/ansible/plugins/modules']
+  ansible python module location = /usr/lib/python3.9/site-packages/ansible
+  ansible collection location = /home/student/.ansible/collections:/usr/share/ansible/collections
+  executable location = /bin/ansible
+  python version = 3.9.25 (main, Mar 26 2026, 00:00:00) [GCC 11.5.0 20240719 (Red Hat 11.5.0-11)] (/usr/bin/python3)
+  jinja version = 3.1.2
+  libyaml = True
+
+
+Systemwide config file = /etc/ansible/ansible.cfg #systemwide project settings [last]
+userwide   config file = /home/student/.ansible.cfg #per user project settings [2]
+folderwide   config file = /home/current/dir/ansible.cfg #user with multiple projects [1]
+
+Inventory:
+    
+https://docs.ansible.com/projects/ansible/latest/inventory_guide/index.html
+
+cat mumdcinventory.ini 
+master.example.com
+node1
+node2
+10.0.15.15
+www.dell.com
+
+[webservers]
+web1.example.com
+apps.example.com
+
+[dbservers]
+db1.example.com
+db2
+
+[routers]
+r1.mumdc.com
+r2.chndc.com
+
+[appservers]
+app1.dell.com
+a2.example.com
+app[21:28].test.com
+
+[servers:children]
+webservers
+dbservers
+appservers
+
+  109  ansible-inventory --help
+  110  ansible-inventory -i mumdcinventory.ini --list
+  111  ansible-inventory -i mumdcinventory.ini --graph
+  112  ansible-inventory -i mumdcinventory.ini servers --graph
+  113  ansible-inventory -i mumdcinventory.ini ungrouped --graph
+  114  ansible-inventory -i mumdcinventory.ini dbservers --graph
+
+
+LAB: create a inventory file with the following requirement
+node1 is under webservers group
+node2 under dbservers group
+these webservers and dbservers will be under servers group
+under appservers group app101-120.demo.com 
+check with ansible-inventory command
+done:Elizabeth,raghu,Naresh,Prince Melkias,Nilesh,Hemant,Ashwini putty,priyanka,Rakshith,Sandeep
+
+Day 7 -  28Apr26    
+1. makesure name resolution works fine
+2. install ansible
+3. create required inventory file (ansible.cfg) - static inventory
+4.     
+
+ansible-inventory
+
+LAB: create key-based SSH auth for devops user on node1 and node2
+  156  ssh-keygen
+  157  tree ~/.ssh/
+  158  ssh-copy-id devops@node1
+  159  ssh devops@node1
+  161  ssh-copy-id devops@node2
+  162  ssh devops@node2
+Done:raghu,Nilesh,Elizabeth,Greeshma,Naresh,Prince Melkias, priyankaBhavitha,Sandeep,Hemant,Ashwini putty,Rakshith,sharif
+
+LAB: update ansible.cfg with root escalation
+
+[student@master ansible]$ cat ansible.cfg 
+[defaults]
+#default inventory file to use
+inventory=/home/student/devops/ansible/inventory.ini
+#connect as devops user  to remote machine
+remote_user=devops
+[privilege_escalation]
+become=True
+become_method=sudo
+become_user=root
+become_ask_pass=False
+
+
+  170   ansible node1 -m command -a id 
+    174   ansible servers -m command -a uptime
+  175   ansible servers -m command -a 'df -h'
+done:Elizabeth,Greeshma,Sandeep,Naresh,raghu,Prince Melkias,Nilesh,Ashwini putty,Aswin,Bhavitha,Rakshith
+    
+    
+    https://github.com/ansible/ansible/blob/stable-2.9/examples/ansible.cfg
+    
+Changes can be made and used in a configuration file which will be searched for in the following order:
+
+    ANSIBLE_CONFIG (environment variable if set)
+
+    ansible.cfg (in the current directory)
+
+    ~/.ansible.cfg (in the home directory)
+
+    /etc/ansible/ansible.cfg
+
+https://docs.ansible.com/projects/ansible/latest/collections/index_module.html
+
+LAB: create accountuser in servers
+
+ 129  ansible servers -m user -a 'name=yy1 state=present'
+  130  ansible servers -m user -a 'name=yy1 state=absent'
+  131  ansible servers -m user -a 'name=yy1 state=present'
+
+done:Naresh,Elizabeth,raghu,Sandeep,Aswin,Prince Melkias,Nilesh,Ashwini putty
+    
+    
+http://10.0.15.1/labs/
+install vscodev -use it for editing all config files
+
+cat 1.playbook-intro.yml 
+#playbook is collection of plays
+- name: play1 create user accounts1 #optional
+  hosts: servers  #mandatory
+  tasks: #mandatory list of tasks to do
+    - name: play1-task1 create user
+      user:
+        name: accounts1
+        state: present
+
+#ansible servers -m user -a 'name=username state=present'
+
+# - name: play2 - install webserver
+#   hosts: webservers
+
+# - name: play3 - install dbserver
+#   hosts: dbservers
+
+# - name: play4 - start patch update
+#   hosts: servers
+
+
+LAB: create webuser1 in servers group systems
+done: Nilesh,Elizabeth,Prince Melkias,Sandeep,Hemant,raghu
+    
+
+
+cat 1.playbook-intro.yml 
+#playbook is collection of plays
+- name: play1 create user accounts1 #optional
+  hosts: servers  #mandatory
+  tasks: #mandatory list of tasks to do
+    - name: play1-task1 create user
+      user:
+        name: accounts1
+        state: present
+    - name: create group1
+      ansible.builtin.group:
+        name: group1
+        state: present
+
+#ansible servers -m user -a 'name=username state=present'
+
+
+LAB: create webdevolopers group add webdev1 as member of this group
+tasks: T1 - create group, T2- create user add him to the group
+
+cat 2.creategroup-user.yml 
+#create group-user playbook
+- name: create webdev group and group-user
+  hosts: node1
+  tasks:
+    - name: create webdev group 
+      ansible.builtin.group:
+        name: webdevgroup
+        state: present
+    - name: create user add to webgroup
+      ansible.builtin.user:
+        name: webdev1
+        state: present
+        groups: webdevgroup
+        
+        
+Day 8 - 29Apr26
+
+Install ansible >>>inventory.ini | ansible.cfg
+ansible , ansible-inventory, ansible-playbook, ...ansible-config
+
+ 211  ansible-config --help
+  212  ansible-config view
+  213  ansible-config dump
+  214  ansible-config list
+  215  ansible-config dump
+
+install apache webserver, copy homepage /var/www/html/index.htm, start service, open firewall port http/80/tcp
+
+
+Application: browsing,chatting, emailing,collab
+    program: *.rpm, *.exe - code - chrome.exe,firefox.exe,outlook.exe,thunderbird,
+        process: running program - cpu/ram/str/net - user interaction/input
+            service: running program - httpd,sshd,tftpd -in the backgroud - triggered
+                daemon:
+
+  51  dnf search webserver
+   52  dnf list
+   53  dnf list|wc -l
+   54  dnf search httpd
+   55  dnf info httpd
+   56  dnf install httpd
+   57  systemctl status httpd
+   58  systemctl enable httpd
+   59  systemctl status httpd
+   60  systemctl start httpd
+   61  systemctl status httpd
+   62  echo "Welcome our first web server in linux" > /var/www/html/index.html
+   63  curl http://node1
+   64  firewall-cmd --list-all
+   65  firewall-cmd --add-service=http --permanent 
+   66  firewall-cmd --reload
+   67  firewall-cmd --list-all
+
+cat 3.installwebserver.yml 
+- name: install and configure web server
+  hosts: webservers
+  tasks:
+    - name: install web server httpd
+      ansible.builtin.dnf: #use dnf module
+        name: httpd
+        state: latest
+    - name: start httpd service
+      ansible.builtin.service: #use service module
+        name: httpd
+        state: started
+        enabled: true
+    - name: copy homepage to webservers
+      ansible.builtin.copy:
+        src: srcindex.html
+        dest: /var/www/html/index.html
+    - name: open firewall port http/80
+      ansible.posix.firewalld:
+        service: http 
+        state: enabled
+        permanent: true
+        immediate: yes
+
+LAB: install mariadb server in dbservers group
+pkgname: mariadb-server
+service: mariadb
+
+LAB: install mariadb server in dbservers group
+
+- name: installmariadbserver.yml
+  hosts: dbservers
+  tasks: 
+    - name: install db server mariadb
+      ansible.builtin.dnf:
+        name: mariadb-server
+        state: latest
+
+    - name: start mariadb service
+      ansible.builtin.service:
+         name: mariadb
+         state: started
+         enabled: true
+    - name: open firewall for mariadb
+      ansible.posix.firewalld:
+         service: mysql     
+         state: enabled
+         permanent: true
+         immediate: yes
+
+Zaaaa
+    
+ 
+ Ansible Variables
+ 
+ 
+214  ansible-playbook 6.varplaybook.yml 
+  215  ansible-playbook 6.varplaybook.yml -e pkg=tftp
+  216  ansible-playbook 6.varplaybook.yml -e pkg=dialog
+  217  ansible-playbook 6.varplaybook.yml 
+  218  ansible-playbook 6.varplaybook.yml -e pkg=tftp
+  219  ansible-playbook 7.installapp-variables.yml 
+  220  ansible-playbook 7.installapp-variables.yml -e app=mariadb-server -e appservice=mariadb -e apport=8888
+    
+    cat 6.varplaybook.yml 
+- name: install different packages using variable
+  hosts: node1f
+  vars:
+    pkg: dovecot
+  tasks:
+    - name: "install {{ pkg }}"
+      dnf:
+        name: "{{ pkg }}"
+        state: present
+
+cat 7.installapp-variables.yml 
+- name: install Server apps
+  hosts: node1
+  vars:
+    app: httpd
+    appservice: httpd
+    appport: 3309
+  tasks: 
+    - name: "install {{ app }} package"
+      ansible.builtin.dnf:
+        name: "{{ app }}"
+        state: latest
+    - name: "start {{appservice}} service"
+      ansible.builtin.service:
+         name: "{{appservice}}"
+         state: started
+         enabled: true
+    - name: "open firewall for {{appport}}"
+      ansible.posix.firewalld:
+         #service: mysql
+         port: "{{appport}}/tcp"
+         state: enabled
+         permanent: true
+         immediate: yes
+
+214  ansible-playbook 6.varplaybook.yml 
+  215  ansible-playbook 6.varplaybook.yml -e pkg=tftp
+  216  ansible-playbook 6.varplaybook.yml -e pkg=dialog
+  217  ansible-playbook 6.varplaybook.yml 
+  218  ansible-playbook 6.varplaybook.yml -e pkg=tftp
+  219  ansible-playbook 7.installapp-variables.yml 
+  220  ansible-playbook 7.installapp-variables.yml -e app=mariadb-server -e appservice=mariadb -e apport=8888
+
+
+
+LAB: create disk report using variable -1. supply default var inside playbook, change the value of vcariable during runtime
+done:
+    
+    
+    cat 8.diskreport-var.yml 
+- name: get df report info
+  hosts: servers
+  vars:
+    fn: diskreport.txt
+  tasks: 
+    - name: "generate report {{fn}}"
+      #ansible.builtin.command: uptime & id
+      ansible.builtin.shell: "df -h / /boot /home >/tmp/{{fn}}"
+
+  224  ansible-playbook 8.diskreport-var.yml 
+  225  ansible-playbook 8.diskreport-var.yml  -e fn=dr.txt
+
+
+
+
+cat 9.installapp-varfiles.yml 
+- name: install Server apps
+  hosts: node1
+  vars_files: 9.values.txt #variables supplied outside playbook
+  #using a file
+  # vars: #disable local vars
+  #   app: httpd
+  #   appservice: httpd
+  #   appport: 3309
+  tasks: 
+    - name: "install {{ app }} package"
+      ansible.builtin.dnf:
+        name: "{{ app }}"
+        state: latest
+    - name: "start {{appservice}} service"
+      ansible.builtin.service:
+         name: "{{appservice}}"
+         state: started
+         enabled: true
+    - name: "open firewall for {{appport}}"
+      ansible.posix.firewalld:
+         #service: mysql
+         port: "{{appport}}/tcp"
+         state: enabled
+         permanent: true
+         immediate: yes
+
+cat 9.values.txt 
+app: mariadb-server
+appservice: mariadb
+appport: 8899
+
+  228  ansible-playbook 9.installapp-varfiles.yml
+done:Prince Melkias,raghu,Sandeep,Aswin,greeshma,Naresh,priyanka,Ashwini putty
+
+    
+    
+cat 10.0loop-user.yml  
+- name: create sales group, create and add s1,s2,s3 user accounts
+  hosts: servers
+  vars:
+    apps:
+      - dialog
+      - tftp
+      - dovecot
+  tasks: 
+    - name: install multiple apps
+      dnf: 
+        name: "{{apps}}"
+        state: present
+    - name: create sales group
+      group:
+        name: sales
+        state: present
+    - name: create sales user
+      ansible.builtin.user:
+        name: "{{item}}" #loop through items
+        state: present
+        groups: sales
+      #with_items: #list of iltems to create
+      loop:
+        - s1
+        - s2
+        - s3
+
+
+  LAB: create marketing group, add m1,m2,m3 using loop in playbook
+  done:Sandeep,raghu,Prince Melkias,Aswin,Rakshith,Ashwini putty
+      
+    
+    cat 10.1userloop-vars.yml 
+- name: create marketing group, create and add m1,m2,m3 user accounts
+  hosts: servers
+  vars:
+    users:
+      - m1
+      - m2
+      - m3
+  tasks: 
+    - name: create marketing group
+      group:
+        name: marketing
+        state: present
+    - name: create markeing user
+      ansible.builtin.user:
+        name: "{{item}}" #loop through items
+        state: present
+        groups: marketing
+      #with_items: #list of iltems to create
+      loop: "{{users}}"
+        # - s1
+        # - s2
+        # - s3
+    
+    
+ cat 10.2userloop-varfiles.yml 
+- name: create marketing group, create and add m1,m2,m3 user accounts
+  hosts: servers
+  vars_files: 10.userlist.txt
+  # vars:
+  #   users:
+  #     - m1
+  #     - m2
+  #     - m3
+  tasks: 
+    - name: create marketing group
+      group:
+        name: marketing
+        state: present
+    - name: create markeing user
+      ansible.builtin.user:
+        name: "{{item}}" #loop through items
+        state: present
+        groups: marketing
+      #with_items: #list of iltems to create
+      loop: "{{users}}"
+        # - s1
+        # - s2
+        # - s3   
+    
+    cat 10.userlist.txt 
+users:
+ - m11
+ - m12
+ - m13
+ - m14
+    
+Day 9 - 30Apr26 
+
+Ansible - Config - mgmt
+1. install Apps 
+2. service mgmt
+3. user mgmt
+4. res mgmt
+
+ Ansible / ansible-config / ansible-playbook / ansible-inventory /
+ Module - user / group / service / dnf/yum/apt/package / firewalld / copy / fetch / 
+ var - "{{ }}" - 1. within playbook - playlevel/tasklevel, vars_files / command -e varkey=value
+
+ansible-valut
+ansible-galaxy
+    
+https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/user_module.html#ansible-collections-ansible-builtin-user-module
+ plaintext -->algo+key===>ciphertext===>algo+key---->plaintext - encryption
+
+LAB: create multiple user accounr supplied as required by HR with passwords. protect file with ansible vault
+cat 11.userinfo.txt 
+userlist:
+    - uname: sales123
+      uinitial: a
+      ushell: /bin/bash
+      upass: RedHat
+    - uname: sales124
+      uinitial: b
+      ushell: /bin/bash
+      upass: Ubuntu
+    - uname: sales125
+      uinitial: c
+      ushell: /bin/bash
+      upass: Rockypass
+    - uname: sales126
+      uinitial: d
+      ushell: /bin/bash
+      upass: Rockypass
+serverlist:
+    - name: s19 
+      ip: 10.0.0.19
+    - name: s9
+      ip: 10.0.0.9
+    - name: s29 
+      ip: 10.0.0.29
+cat 11.0usercreateHR.yml 
+- name: create multiple user account using HR file (11.userinfo.txt)
+  hosts: servers
+  vars_files: 11.userinfo.txt
+  tasks: 
+    - name: create users based on HR data
+      ansible.builtin.user:
+        name: "{{item.uname}}" #loop through items
+        shell: "{{item.ushell}}"
+        password: "{{item.upass | password_hash('sha512')}}"
+        state: present
+        groups: marketing
+      loop: "{{userlist}}"   
+    
+    257  ansible-vault --help
+  258  ansible-vault create dbsecret.txt
+  259  ls
+  260  cat dbsecret.txt 
+  261  ansible-vault view dbsecret.txt 
+  262  ansible-vault edit dbsecret.txt 
+  263  cat dbsecret.txt 
+  264  cat 11.userinfo.txt 
+  265  cp 11.userinfo.txt 11.vault-userinfo.txt
+  266  ls 11*
+  267  ls -l 11*
+  268  nano 11.vault-userinfo.txt 
+  269  ansible-vault encrypt 11.vault-userinfo.txt 
+  270  nano 11.vault-userinfo.txt 
+  271  ansible-vault edit 11.vault-userinfo.txt 
+  272  ansible-playbook --help
+  
+  cat 11.2usercreateHRvaulted.yml 
+- name: create multiple user account using HR file (11.userinfo.txt)
+  hosts: servers
+  vars_files: 11.vault-userinfo.txt
+  tasks: 
+    - name: create users based on HR data
+      no_log: true
+      ansible.builtin.user:
+        name: "{{item.uname}}" #loop through items
+        shell: "{{item.ushell}}"
+        password: "{{item.upass | password_hash('sha512')}}"
+        state: present
+        groups: marketing
+      loop: "{{userlist}}"
+  
+  
+  
+  273  ansible-playbook 11.2usercreateHRvaulted.yml 
+  274  ansible-playbook 11.2usercreateHRvaulted.yml --ask-vault-password
+  
+   Done: Elizabeth,raghu,Naresh,Nilesh,Ashwini putty,priyanka
+ FACTS:
+     https://docs.ansible.com/projects/ansible/latest/playbook_guide/playbooks_conditionals.html
+     
+    "ansible_distribution": "Rocky",
+        "ansible_distribution_file_parsed": true,
+        "ansible_distribution_file_path": "/etc/redhat-release",
+        "ansible_distribution_file_variety": "RedHat",
+        "ansible_distribution_major_version": "9",
+        "ansible_distribution_release": "Blue Onyx",
+        "ansible_distribution_version": "9.6",
+             "ansible_memfree_mb": 2186,
+             "ansible_memtotal_mb": 3655
+              "ansible_os_family": "RedHat",
+        "ansible_pkg_mgr": "dnf",
+                "ansible_processor_vcpus": 2,
+    
+    cat 12.when-condition.yml 
+- name: install webservices on servers
+  hosts: servers
+  tasks:
+    - name: install http if redhat
+      when: ansible_os_family == "RedHat"
+      dnf: 
+        name: httpd
+        state: latest
+    - name: install nginx if ubuntu
+      when: ansible_os_family == "Ubuntu"
+      ansible.builtin.apt:
+        name: nginx
+        state: latest
+
+   LAB: install dialog app if total memory(RAM) more than 4GB
+   use when contion "ansible_memtotal_mb": 3655 in facts
+   
+    done:Prince Melkias,Naresh,raghu,Elizabeth,priyanka,Aswin,Nilesh,Greeshma
+        
+        
+- name: install dialog if ubuntu
+      when: ansible_memtotal_mb > 4096 and ansible_os_family == "Ubuntu"
+      ansible.builtin.apt:
+        name: dialog
+        state: latest   
+        
+        
+    
+    cat 13.import-playbooks.yml 
+#import-playbooks
+- name: deploy fron-end webservers
+  ansible.builtin.import_playbook: "3.installwebserver.yml"
+
+- name: deploy backend db servers 
+  ansible.builtin.import_playbook: "4.installmariadb.yml"
+  
+262  ansible-playbook 13.import-playbooks.yml --list-tasks
+263  ansible-playbook 13.import-playbooks.yml 
+
+import - tasks - include tasks
+tasks/
+├── firewall.yml
+├── installapp.yml
+├── service.yml
+└── user.yml
+    
+cat tasks/installapp.yml 
+- name: "install {{ app }} package"
+  ansible.builtin.dnf:
+    name: "{{ app }}"
+    state: latest
+
+cat tasks/service.yml 
+- name: "start {{appservice}} service"
+  ansible.builtin.service:
+      name: "{{appservice}}"
+      state: started
+      enabled: true
+      
+cat tasks/firewall.yml 
+    - name: "open firewall for {{appport}}"
+      ansible.posix.firewalld:
+         #service: mysql
+         port: "{{appport}}/tcp"
+         state: enabled
+         permanent: true
+         immediate: yes
+         
+cat tasks/user.yml 
+- name: "create {{user}}"
+  user:
+    name: "{{user}}"
+    state: present
+    
+cat 14.import-tasks.yml 
+- name: using import task in this demo
+  hosts: webservers
+  vars:
+    app: httpd
+    appservice: httpd
+    appport: 443
+    user: demouser1
+  tasks:
+    - name: import install task from tasks folder
+      ansible.builtin.import_tasks: "tasks/installapp.yml"
+
+    - name: import task from tasks/service.yml
+      ansible.builtin.import_tasks: "tasks/service.yml"
+
+    - name: include task from tasks folder firewall
+      ansible.builtin.include_tasks: "tasks/firewall.yml"
+    
+    - name: include task from tasks folder user
+      ansible.builtin.include_tasks: "tasks/user.yml"
+    
+    
+      266  ansible-playbook 14.import-tasks.yml --list-tasks
+  267  ansible-playbook 14.import-tasks.yml 
+  
+  LAB: deploy dbservers with import/include_tasks
+  done:Ashwini putty
+      
+            
+DRY  
+    
+    
+    
+roles/
+    common/               # this hierarchy represents a "role"
+        tasks/            #
+            main.yml      #  <-- tasks file can include smaller files if warranted
+        handlers/         #
+            main.yml      #  <-- handlers file
+        templates/        #  <-- files for use with the template resource
+            ntp.conf.j2   #  <------- templates end in .j2
+        files/            #
+            bar.txt       #  <-- files for use with the copy resource
+            foo.sh        #  <-- script files for use with the script resource
+        vars/             #
+            main.yml      #  <-- variables associated with this role
+        defaults/         #
+            main.yml      #  <-- default lower priority variables for this role
+        meta/             #
+            main.yml      #  <-- role dependencies
+        library/          # roles can also include custom modules
+        module_utils/     # roles can also include custom module_utils
+        lookup_plugins/   # or other types of plugins, like lookup in this case
+
+    webtier/              # same kind of structure as "common" was above, done for the webtier role
+    monitoring/           # ""
+    fooapp/               # ""
+    
+Ansible Galaxy    
+  278  mkdir roles
+  279  cd roles
+  280  ls
+  281  tree
+  282  ansible-galaxy --help
+  283  ansible-galaxy role --help
+  284  ansible-galaxy role init webrole
+  285  tree
+  286  ansible-galaxy role init dbrole
+  287  ansible-galaxy role initlobapprole
+  288  tree
+  289  ls
+  290  ansible-galaxy role init lobapprole
+  291  tree
+  292  cd ..
+  293  ansible-galaxy role install geerlingguy.docker
+  294  ansible-galaxy role --help
+  295  ansible-galaxy role list
+  296  ansible-galaxy role remove geerlingguy.docker    
+    
+    
+Day 10 - 4Apr26
+    
+    
+Connect to Node2
+
+firefox : http://10.0.15.1
+install vscode (http://10.0.15.1/labs/
+
+
+install docker https://docs.docker.com/engine/install/rhel/
+
+ 
+## 1. install docker
+
+## 1.1 remove existing versions of docker or any container based apps if exists
+sudo dnf remove docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-engine \
+                  podman \
+                  runc
+
+## 1.2 configure docker repositories (to install docker)
+sudo dnf -y install dnf-plugins-core
+sudo dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo
+
+## 1.3 install docker
+sudo dnf install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+## 1.4 start docker service and enable it(on reboot - auto start)
+sudo systemctl enable --now docker
+
+## 1,5 To create the docker group and add your user:
+Create the docker group.
+      sudo groupadd docker
+Add your user to the docker group.
+      sudo usermod -aG docker $USER
+      sudo usermod -aG docker student/(requireduser - devops)
+
+Log out and log back in so that your group membership is re-evaluated.
+without logout 
+    newgrp docker
+
+## 1.6 chacke docker version
+docker version
+
+
+docker version
+Client: Docker Engine - Community
+ Version:           29.4.2
+ API version:       1.54
+ Go version:        go1.26.2
+ Git commit:        055a478
+ Built:             Fri May  1 10:27:28 2026
+ OS/Arch:           linux/amd64
+ Context:           default
+
+Server: Docker Engine - Community
+ Engine:
+  Version:          29.4.2
+  API version:      1.54 (minimum version 1.40)
+  Go version:       go1.26.2
+  Git commit:       d329809
+  Built:            Fri May  1 10:23:26 2026
+  OS/Arch:          linux/amd64
+  Experimental:     false
+ containerd:
+  Version:          v2.2.3
+  GitCommit:        77c84241c7cbdd9b4eca2591793e3d4f4317c590
+ runc:
+  Version:          1.3.5
+  GitCommit:        v1.3.5-0-g488fc13e
+ docker-init:
+  Version:          0.19.0
+  GitCommit:        de40ad0
+   
+LAB: install docker 
+done: Greeshma,Rakshith,raghu,Ashwini putty,Nilesh,Bhavitha,Naresh Easwar,Sandeep,Elizabeth,Priyanka,Prince Melkias
+
+    
+Java App
+
+
+HW/OS/Javaruntime >>>>write code         
+
+docker pull esun23/easwarmay26    
+
+docker pull nil141/nileshbusybox:1.0
+docker pull shajahanak/updatednileshapp
+
+docker pull  sandeep1721/dockerfirstimage
+docker pull greeshmanair/nidhuimage
+docker pull bhavithaavula/bhavithadockerimage
+docker pull elizabeth97/elizabethmay
+docker pull priyadeepu/priyankamay4
+
+Day 11 - 5May26
+Dev: docker pull imagename(base image)
+
+    docker run -it imagename /bin/sh >>>connects to container ----exit --stops container (maintains state)
+
+    docker diff -list the diff between base image and container state
+
+    docker commit contID docker.io/useraccount/imagename
+
+    docker push docker.io/useraccount/imagename )to docker hub -default after docker login -u username & password)
+
+    in docker hum make pulic view
+
+
+
+Lab: run image rocky:latest connect and install git
+docker search --help
+
+docker search rockylinux
+docker search shajahanak/myappimage
+
+docker run -it rockylinux /bin/bash # by default looks for :latest tag 
+
+docker run -it rockylinux:9.3 /bin/bash #with version tag
+
+inside container:::::
+dnf install git
+exit
+
+docker commit contID useraccount/imagename:versiontag
+docker push ---
+done:
+Bhavitha     docker pull bhavithaavula/gitimage
+Nilesh     docker pull nil141/rocky-git-vim:1.4
+docker pull ashwini/rocky-git:1.0
+
+
+
+    
+LAB: create custom homepage in HTTPD image runnig as container + test accessing http://ipofcontainer
+#run httpd image from docker and customize homepage
+docker run -d --name web1 httpd #no cmd /bin/bash/sh NOT required
+docker exec -it contID /bin/bash #/usr/local/apache2/htdocs create/update index.html
+docker inspect contID #find the ip
+
+
+docker run -d --name web2 -p 8191:80 nginxdemos/hello
+docker run -d --name web3 -p 8292:80 nginxdemos/hello
+
+
+
+
+LAB: run nginxdemos/hello app in port no 8292
+done:
+   Nilesh - http://10.0.15.53:8192/
+   raghu - http://10.0.15.163:8292/ - 
+   Naresh http://10.0.15.43:8292
+   Bhavitha http://10.0.15.78:8393/
+   Ashwini http://10.0.15.158:8494/
+  Easwar: http://10.0.15.133:8292/
+  Greeshma: http://10.0.15.68:8195/
+  Elizabeth:http://10.0.15.88:8191/
+  
+
+Install VScode extention docker/microsoft (container tools)
+
+Dockerfile 
+FROM rockylinux:9
+RUN dnf install git -y
+RUN mkdir /ticketing
+RUN ls -l / >ticketing/filelist.txt  
+
+
+    docker build -t username/imagename:version -f Dockerfile .
+
+
+LAB: create ubuntu 24.04 install git
+apt-get update 
+apt-get install git -y
+create dir onlineshop / indise that dir creata a file time stamp
+DOne:Ashwini putty,Bhavitha,Greeshma,
+    
+
+#create httpd image with index file using RUN instruction
+FROM httpd
+RUN echo "Some message" > /usr/local/apache2/htdocs/index.html
+#COPY 5.index.html /usr/local/apache2/htdocs/index.html
+EXPOSE 80/tcp
+
+   92  docker build -t shajahanak/httpd:v1.0 -f 4.http.dockerfile .
+   93  docker run -d -p 9099:80 shajahanak/httpd:v1.0 
+   
+
+#create httpd image with index file using COPY  instruction by copying file(5.index.html) from current dir of the host
+FROM httpd
+#RUN echo "Some message" > /usr/local/apache2/htdocs/index.html
+COPY 5.index.html /usr/local/apache2/htdocs/index.html
+EXPOSE 80/tcp
+
+93  docker run -d -p 9098:80 shajahanak/httpd:v1.1
+
+Volume mapping: create a folder with index.html file map that file in side container 
+
+   95  docker run -dit -p 9494:80 -v "$PWD/webcontents":/usr/local/apache2/htdocs/ shajahanak/httpd:v1.1
+   96  docker exec -it 35ce
+   97  docker exec -it 35ce bash
+browse http://nodeip"9494
+
+
+Day 12 - 6May26
+docker run -dp 80:80 docker/getting-started
+Docker - pull/push/run/stop/exec/pause/rm/rmi/...
+
+Base Images - busybox, rockylinux, alpine
+App based - httpd, nginx, python, nodejs,mariadb
+
+
+Interactive  - -it , detached -d, portmapping -p hostport:contport, -v volume mapping /host/path/to/mount:container/path/to/mount
+Docker build
+
+Ansible - docker integration
+ 
+ 
+ 1. add devops as docker group memeber on docker installed systems
+
+     [on node2]   sudo usermod -aG docker devops
+
+2. ansible-galaxy collection install community.docker
+3. create plabook & run
+cat 16.deploycontainer.yml 
+- name: deploy nginxdemos/hello using ansible on node2 docker system
+  hosts: node2
+  tasks:
+    - name: pull nginx demo image
+      community.docker.docker_image:
+        name: nginxdemos/hello
+        source: pull
+    - name: run image nginx
+      community.docker.docker_container:
+        name: mydemo
+        image: nginxdemos/hello
+        ports:
+          - "8111:80"
+        state: started
+    
+Done:Elizabeth,Ashwini putty
+TASK: use a image wht you built yesterdays with dockerfile    
+
+
+
+
+K8s Installation
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#!/bin/bash 
+ 
+# ============================================================ 
+# Kubernetes + Containerd Installation Script for Rocky Linux 9 
+# Author: Shaj 
+# Version: 2.2 
+# ============================================================ 
+ 
+set -e # Exit immediately if a command exits with a non-zero status 
+ 
+KUBERNETES_VERSION="1.32" 
+ 
+echo "==============================================" 
+echo " Starting Kubernetes $KUBERNETES_VERSION with Containerd setup" 
+echo "==============================================" 
+ 
+# ============================================================ 
+# Step 1: Disable Firewall, Swap and disabling SELinux 
+# ============================================================ 
+echo "[1/9] Disabling firewalld and swap..." 
+systemctl disable --now firewalld || true 
+swapoff -a 
+sed -i '/swap/s/^/#/' /etc/fstab 
+echo "✅ Firewall disabled and swap turned off" 
+setenforce 0 
+sed -i 's/^SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config 
+ 
+# ============================================================ 
+# Step 2: Enable required kernel modules and sysctl parameters 
+# ============================================================ 
+echo "[2/9] Enabling kernel modules and sysctl parameters for networking..." 
+ 
+# Load kernel modules 
+cat <<EOF | tee /etc/modules-load.d/k8s.conf 
+overlay 
+br_netfilter 
+EOF 
+ 
+modprobe overlay 
+modprobe br_netfilter 
+ 
+# Configure sysctl parameters 
+cat <<EOF | tee /etc/sysctl.d/k8s.conf 
+net.bridge.bridge-nf-call-iptables = 1 
+net.bridge.bridge-nf-call-ip6tables = 1 
+net.ipv4.ip_forward = 1 
+EOF 
+ 
+sysctl --system 
+echo "✅ Kernel modules and sysctl parameters configured successfully" 
+ 
+# ============================================================ 
+# Step 3: Install required dependencies 
+# ============================================================ 
+echo "[3/9] Installing dependencies..." 
+dnf install -y dnf-plugins-core container-selinux curl 
+echo "✅ Dependencies installed successfully" 
+ 
+# ============================================================ 
+# Step 4: Configure Kubernetes repository 
+# ============================================================ 
+echo "[4/9] Configuring Kubernetes repo for $KUBERNETES_VERSION..." 
+cat <<EOF | tee /etc/yum.repos.d/kubernetes.repo 
+[kubernetes] 
+name=Kubernetes 
+baseurl=https://pkgs.k8s.io/core:/stable:/v$KUBERNETES_VERSION/rpm/ 
+enabled=1 
+gpgcheck=1 
+gpgkey=https://pkgs.k8s.io/core:/stable:/v$KUBERNETES_VERSION/rpm/repodata/repomd.xml.key 
+exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni 
+EOF 
+echo "✅ Kubernetes repo configured successfully" 
+ 
+# ============================================================ 
+# Step 5: Install and configure Containerd from Docker repo 
+# ============================================================ 
+echo "[5/9] Installing and configuring Containerd..." 
+ 
+# Add Docker repository 
+dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo 
+ 
+# Install containerd 
+dnf install -y containerd.io 
+ 
+# Generate default containerd config and enable systemd cgroups 
+mkdir -p /etc/containerd 
+containerd config default | tee /etc/containerd/config.toml 
+sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml 
+ 
+# Start and enable containerd 
+systemctl daemon-reload 
+systemctl enable containerd --now 
+ 
+# Verify containerd is working 
+if systemctl is-active --quiet containerd; then 
+    echo "✅ Containerd installed and running successfully" 
+else 
+    echo "❌ Containerd failed to start" 
+    systemctl status containerd 
+    exit 1 
+fi 
+ 
+# ============================================================ 
+# Step 6: Install Kubernetes components 
+# ============================================================ 
+echo "[6/9] Installing kubelet, kubeadm, and kubectl..." 
+dnf install -y kubelet kubeadm kubectl --disableexcludes=kubernetes 
+echo "✅ Kubernetes components installed successfully" 
+ 
+# ============================================================ 
+# Step 7: Enable kubelet service 
+# ============================================================ 
+echo "[7/9] Enabling kubelet service..." 
+systemctl enable kubelet.service 
+echo "✅ kubelet service enabled" 
+ 
+# ============================================================ 
+# Node Role Selection Prompt 
+# ============================================================ 
+echo "" 
+echo "==============================================" 
+echo "  Node Role Selection" 
+echo "==============================================" 
+echo " Common setup complete. How would you like to continue?" 
+echo "" 
+echo "  [1] Control Plane  — Initialize this node as a Kubernetes" 
+echo "                        control-plane (master) node" 
+echo "  [2] Worker Node    — Stop here; this node is ready to join" 
+echo "                        an existing cluster as a worker" 
+echo "==============================================" 
+ 
+while true; do 
+    read -rp "Enter your choice [1 or 2]: " NODE_ROLE 
+    case "$NODE_ROLE" in 
+        1) 
+            echo "" 
+            echo "➡️  Proceeding with Control Plane initialization..." 
+            break 
+            ;; 
+        2) 
+            echo "" 
+            echo "==============================================" 
+            echo "✅ Kubernetes Worker Node is ready!" 
+            echo "==============================================" 
+            echo "" 
+            echo "This node has been configured with:" 
+            echo "  • Containerd (CRI) running and enabled" 
+            echo "  • kubelet / kubeadm / kubectl installed" 
+            echo "  • Required kernel modules and sysctl settings applied" 
+            echo "" 
+            echo "To join this node to an existing cluster, run the" 
+            echo "'kubeadm join' command provided by your control-plane." 
+            echo "" 
+            echo "Example:" 
+            echo "  kubeadm join <CONTROL_PLANE_IP>:6443 \\" 
+            echo "    --token <TOKEN> \\" 
+            echo "    --discovery-token-ca-cert-hash sha256:<HASH>" 
+            echo "" 
+            echo "Retrieve a fresh join command from the control-plane with:" 
+            echo "  kubeadm token create --print-join-command" 
+            echo "==============================================" 
+            exit 0 
+            ;; 
+        *) 
+            echo "❌ Invalid choice. Please enter 1 (Control Plane) or 2 (Worker Node)." 
+            ;; 
+    esac 
+done 
+ 
+# ============================================================ 
+# Step 8: Initialize Kubernetes control plane 
+# ============================================================ 
+echo "[8/9] Initializing Kubernetes cluster..." 
+ 
+# Configure kubeadm to use containerd 
+cat <<EOF | tee /tmp/kubeadm-config.yaml 
+apiVersion: kubeadm.k8s.io/v1beta3 
+kind: InitConfiguration 
+nodeRegistration: 
+  criSocket: "unix:///var/run/containerd/containerd.sock" 
+--- 
+apiVersion: kubeadm.k8s.io/v1beta3 
+kind: ClusterConfiguration 
+networking: 
+  podSubnet: "192.168.0.0/16" 
+EOF 
+ 
+kubeadm init --config=/tmp/kubeadm-config.yaml | tee /root/bootstrap.txt 
+ 
+# Check if initialization was successful 
+if [ $? -eq 0 ]; then 
+    echo "✅ Kubernetes cluster initialized successfully" 
+else 
+    echo "❌ Kubernetes cluster initialization failed" 
+    exit 1 
+fi 
+ 
+# ============================================================ 
+# Configure kubectl for both root and student user 
+# ============================================================ 
+ 
+echo "Configuring kubectl for root user..." 
+mkdir -p /root/.kube 
+cp -i /etc/kubernetes/admin.conf /root/.kube/config 
+chown root:root /root/.kube/config 
+ 
+echo "Configuring kubectl for student user..." 
+mkdir -p /home/student/.kube 
+cp -i /etc/kubernetes/admin.conf /home/student/.kube/config 
+chown student:student /home/student/.kube/config 
+chmod 600 /home/student/.kube/config 
+ 
+# Add KUBECONFIG to student's bashrc 
+echo "export KUBECONFIG=/home/student/.kube/config" >> /home/student/.bashrc 
+ 
+# ============================================================ 
+# Step 9: Configure kubectl and networking 
+# ============================================================ 
+echo "[9/9] Configuring kubectl and networking..." 
+ 
+# Configure kubectl for root user 
+mkdir -p $HOME/.kube 
+cp -i /etc/kubernetes/admin.conf $HOME/.kube/config 
+chown $(id -u):$(id -g) $HOME/.kube/config 
+ 
+# Install Calico CNI 
+echo "Installing Calico CNI..." 
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.30.3/manifests/calico.yaml 
+ 
+echo "✅ Calico network plugin installed" 
+ 
+# Wait for pods to be ready 
+echo "Waiting for system pods to be ready..." 
+sleep 60 
+ 
+echo "✅ Kubernetes Pod Status:" 
+kubectl get pods -A 
+ 
+echo "✅ Kubernetes Node Status:" 
+kubectl get nodes 
+ 
+echo "==============================================" 
+echo " Kubernetes $KUBERNETES_VERSION + Containerd setup complete!" 
+echo "==============================================" 
+echo "" 
+echo "To start using your cluster:" 
+echo "1. Run: kubectl get pods -A" 
+echo "2. To join worker nodes, use the command from: /root/bootstrap.txt" 
+echo "3. Remove taint for single-node cluster: kubectl taint nodes --all node-role.kubernetes.io/control-plane-" 
+echo "==============================================" 
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+https://kubernetes.io/docs/reference/networking/ports-and-protocols/
+
+
+Day 13 - 7May26
+
+Install K8s master
+[student@master]$ wget http://10.0.15.1/labs/k8s/0.installk8s.sh
+su [as root]
+chmod +x 0.installk8s.sh
+bash 0.installk8s.sh [./0.installk8s.sh]
+selct option1 to make master as k8s controll plane
+
+  365  kubectl get nodes
+  366  kubectl get pods -A
+  367  systemctl status kubelet.service 
+  
+  
+on Node1 & node 2 (make as k8s worker node)
+   39  wget http://10.0.15.1/labs/k8s/0.installk8s.sh
+   40  chmod +x 0.installk8s.sh 
+   41  ./0.installk8s.sh [select option @the end]
+   use kubeadm join command
+   K8s labsetup ready
+   DOne: Sandeep,Elizabeth,Naresh,Rakshith,raghu,Hemant,Greeshma,Ashwini putty,Bhavitha,Nilesh,priyanka
+       
+
+
+Docker - Container management[Single Host] - + docker compose[multi-container -frontendwebapp+backenddb] + docker swarm(multi-host docker management)
+
+
+K8s - Control-Node(master) - apiserver/
+
+
+
+
+  371  kubectl get nodes
+  372  kubectl get nodes -o wide
+  373  kubectl get pods -A
+  374  kubectl
+  375  kubectl get nodes
+  376  kubectl get nodes -A
+  377  kubectl get pods
+  378  kubectl get namespace
+  379  kubectl get pods -A
+  380  kubectl get pods 
+  381  kubectl run pod1 --image=nginx
+  382  kubectl get pods 
+  383  kubectl describe pod pod1
+  384  kubectl get pods 
+  385  kubectl get pods -o wide
+  386  kubectl run pod2 --image=nginx
+  387  kubectl get pods -o wide
+  388  kubectl run pod3 --image=nginx
+  389  kubectl run pod4 --image=nginx
+  390  kubectl get pods -o wide
+  
+Lab: run mutiple pods & observe load distributed
+done: Ashwini putty,Bhavitha ,raghu,Nilesh,Elizabeth,Sandeep,Greeshma,Anand
+
+https://kubernetes.io/docs/reference/kubectl/docker-cli-to-kubectl/
+
+392  kubectl run pod5 --image=nginxdemos/hello
+  393  kubectl get pods 
+  394  kubectl get pods -o wide
+  395  kubectl run pod6 --image=nginxdemos/hello
+  396  kubectl get pods -o wide
+  397  kubectl version
+  398  kubectl cluster-info
+  399  kubectl cluster-info dump
+
+  406  kubectl delete pods --all
+  407  kubectl run pod1 --image=nginxdemos/hello --port=80 --labels="app=ordering,env=prod"
+  408  kubectl run pod2 --image=nginxdemos/hello --port=80 --labels="app=ordering,env=dev"
+  409  kubectl run pod3 --image=nginxdemos/hello --port=80 --labels="app=ordering,env=qa"
+  410  kubectl get pods -o wide
+  411  kubectl get pods -l env=dev
+  412  kubectl get pods -l app=ordering
+  413  kubectl run pod4 --image=nginxdemos/hello --port=80 --labels="app=ticketing,env=prod"
+  414  kubectl get pods -l env=prod
+
+Labs: create multiple pods - env=dev,prod  app=booking,delivery
+
+
+ 366  kubectl explain pod
+---------------------------------------------------------------------------
+cat 2.pod.yaml 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod11
+  labels:
+    app: ordering
+    env: prod
+spec:
+  containers:
+    - name: pod11-container
+      image: nginxdemos/hello
+      ----------------------------------------------------------------------------
+  367  kubectl create -f 2.pod.yaml 
+  368  kubectl get po
+  369  kubectl get po pod11 -o wide
+  370  kubectl get po -o wide -l env=prod
+  371  kubectl delete -f 2.pod.yaml 
+  install VSCODE extentions for k8s - ipedrazas / lunuan
+  372  kubectl get po
+  ------------------------------------------------------------------------
+  cat 3.podmanifest.yaml 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "myapp1"
+  namespace: default
+  labels:
+    app: "tracking"
+spec:
+  containers:
+  - name: myapp
+    image: "nginx"
+  -----------------------------------------------------------------------------
+  373  kubectl apply 3.podmanifest.yaml 
+  374  kubectl apply -f 3.podmanifest.yaml 
+  375  kubectl get pods
+  376  kubectl describe pod myapp1
+
+Lab: create manifest file for pod deplyment
+podname: demopod / httpd:latest
+
+done:Ashwini putty,Bhavitha,Naresh,Nilesh,Hemant,Sandeep,priyanka,raghu,Elizabeth,Greesgma,Anand 
+
+
+kubectl api-resources
+NAME                                SHORTNAMES   APIVERSION                          NAMESPACED   KIND
+bindings                                                                   v1                                  true                       Binding
+componentstatuses                   cs                       v1                                  false                     ComponentStatus
+configmaps                                   cm           v1                                  true         ConfigMap
+endpoints                           ep           v1                                  true         Endpoints
+events                              ev           v1                                  true         Event
+limitranges                         limits       v1                                  true         LimitRange
+namespaces                          ns           v1                                  false        Namespace
+nodes                               no           v1                                  false        Node
+persistentvolumeclaims              pvc          v1                                  true         PersistentVolumeClaim
+persistentvolumes                   pv           v1                                  false        PersistentVolume
+pods                                po           v1                                  true         Pod
+podtemplates                                     v1                                  true         PodTemplate
+replicationcontrollers              rc           v1                                  true         ReplicationController
+resourcequotas                      quota        v1                                  true         ResourceQuota
+secrets                                          v1                                  true         Secret
+serviceaccounts                     sa           v1                                  true         ServiceAccount
+services                            svc          v1                                  true         Service
+mutatingwebhookconfigurations                    admissionregistration.k8s.io/v1     false        MutatingWebhookConfiguration
+validatingadmissionpolicies                      admissionregistration.k8s.io/v1     false        ValidatingAdmissionPolicy
+validatingadmissionpolicybindings                admissionregistration.k8s.io/v1     false        ValidatingAdmissionPolicyBinding
+validatingwebhookconfigurations                  admissionregistration.k8s.io/v1     false        ValidatingWebhookConfiguration
+customresourcedefinitions           crd,crds     apiextensions.k8s.io/v1             false        CustomResourceDefinition
+apiservices                                      apiregistration.k8s.io/v1           false        APIService
+controllerrevisions                              apps/v1                             true         ControllerRevision
+daemonsets                          ds           apps/v1                             true         DaemonSet
+deployments                         deploy       apps/v1                             true         Deployment
+replicasets                         rs           apps/v1                             true         ReplicaSet
+statefulsets                        sts          apps/v1                             true         StatefulSet
+selfsubjectreviews                               authentication.k8s.io/v1            false        SelfSubjectReview
+tokenreviews                                     authentication.k8s.io/v1            false        TokenReview
+localsubjectaccessreviews                        authorization.k8s.io/v1             true         LocalSubjectAccessReview
+selfsubjectaccessreviews                         authorization.k8s.io/v1             false        SelfSubjectAccessReview
+selfsubjectrulesreviews                          authorization.k8s.io/v1             false        SelfSubjectRulesReview
+subjectaccessreviews                             authorization.k8s.io/v1             false        SubjectAccessReview
+horizontalpodautoscalers            hpa          autoscaling/v2                      true         HorizontalPodAutoscaler
+cronjobs                            cj           batch/v1                            true         CronJob
+jobs                                             batch/v1                            true         Job
+certificatesigningrequests          csr          certificates.k8s.io/v1              false        CertificateSigningRequest
+leases                                           coordination.k8s.io/v1              true         Lease
+bgpconfigurations                                crd.projectcalico.org/v1            false        BGPConfiguration
+bgpfilters                                       crd.projectcalico.org/v1            false        BGPFilter
+bgppeers                                         crd.projectcalico.org/v1            false        BGPPeer
+blockaffinities                                  crd.projectcalico.org/v1            false        BlockAffinity
+caliconodestatuses                               crd.projectcalico.org/v1            false        CalicoNodeStatus
+clusterinformations                              crd.projectcalico.org/v1            false        ClusterInformation
+felixconfigurations                              crd.projectcalico.org/v1            false        FelixConfiguration
+globalnetworkpolicies                            crd.projectcalico.org/v1            false        GlobalNetworkPolicy
+globalnetworksets                                crd.projectcalico.org/v1            false        GlobalNetworkSet
+hostendpoints                                    crd.projectcalico.org/v1            false        HostEndpoint
+ipamblocks                                       crd.projectcalico.org/v1            false        IPAMBlock
+ipamconfigs                                      crd.projectcalico.org/v1            false        IPAMConfig
+ipamhandles                                      crd.projectcalico.org/v1            false        IPAMHandle
+ippools                                          crd.projectcalico.org/v1            false        IPPool
+ipreservations                                   crd.projectcalico.org/v1            false        IPReservation
+kubecontrollersconfigurations                    crd.projectcalico.org/v1            false        KubeControllersConfiguration
+networkpolicies                                  crd.projectcalico.org/v1            true         NetworkPolicy
+networksets                                      crd.projectcalico.org/v1            true         NetworkSet
+stagedglobalnetworkpolicies                      crd.projectcalico.org/v1            false        StagedGlobalNetworkPolicy
+stagedkubernetesnetworkpolicies                  crd.projectcalico.org/v1            true         StagedKubernetesNetworkPolicy
+stagednetworkpolicies                            crd.projectcalico.org/v1            true         StagedNetworkPolicy
+tiers                                            crd.projectcalico.org/v1            false        Tier
+endpointslices                                   discovery.k8s.io/v1                 true         EndpointSlice
+events                              ev           events.k8s.io/v1                    true         Event
+flowschemas                                      flowcontrol.apiserver.k8s.io/v1     false        FlowSchema
+prioritylevelconfigurations                      flowcontrol.apiserver.k8s.io/v1     false        PriorityLevelConfiguration
+ingressclasses                                   networking.k8s.io/v1                false        IngressClass
+ingresses                           ing          networking.k8s.io/v1                true         Ingress
+networkpolicies                     netpol       networking.k8s.io/v1                true         NetworkPolicy
+runtimeclasses                                   node.k8s.io/v1                      false        RuntimeClass
+poddisruptionbudgets                pdb          policy/v1                           true         PodDisruptionBudget
+adminnetworkpolicies                anp          policy.networking.k8s.io/v1alpha1   false        AdminNetworkPolicy
+baselineadminnetworkpolicies        banp         policy.networking.k8s.io/v1alpha1   false        BaselineAdminNetworkPolicy
+clusterrolebindings                              rbac.authorization.k8s.io/v1        false        ClusterRoleBinding
+clusterroles                                     rbac.authorization.k8s.io/v1        false        ClusterRole
+rolebindings                                     rbac.authorization.k8s.io/v1        true         RoleBinding
+roles                                            rbac.authorization.k8s.io/v1        true         Role
+priorityclasses                     pc           scheduling.k8s.io/v1                false        PriorityClass
+csidrivers                                       storage.k8s.io/v1                   false        CSIDriver
+csinodes                                         storage.k8s.io/v1                   false        CSINode
+csistoragecapacities                             storage.k8s.io/v1                   true         CSIStorageCapacity
+storageclasses                      sc           storage.k8s.io/v1                   false        StorageClass
+volumeattachments                                storage.k8s.io/v1                   false        VolumeAttachment
+
+
+
+  386  kubectl get pods
+  
+  cat 4.replicaset.yml 
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: myreplicaset1
+  labels:
+    app: myapp
+spec:
+  # modify replicas according to your case
+  replicas: 1
+  selector:
+    matchLabels:
+      app: l1
+  template:
+    metadata:
+      labels:
+        app: l1
+    spec:
+      containers:
+      - name: myapp
+        image: nginx
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  387  kubectl apply -f 4.replicaset.yml 
+  388  kubectl get pods
+  389  kubectl get replicaset
+  390  kubectl delete pod myreplicaset1-mwd27
+  391  kubectl get replicaset
+  392  kubectl get pods
+  393  kubectl apply -f 4.replicaset.yml 
+  394  kubectl get pods
+  395  kubectl apply -f 4.replicaset.yml 
+  396  kubectl get pods
+  397  kubectl apply -f 4.replicaset.yml 
+  398  kubectl get pods
+  399  kubectl get pods -o wide
+  400  kubectl apply -f 4.replicaset.yml 
+  401  kubectl get pods -o wide
+
+LAB: create replica manifest to lauch 3 replicas initally, reduce or increse...
+done: Nilesh,Sandeep,Naresh,Bhavitha,priyanka,raghu,Elizabeth,Anand 
+    
+   https://killercoda.com/kubernetes 
+    3  k create deployment my-first-deployment --image=nginx:alpine
+    4  k get deployment my-first-deployment
+    5  k get rs
+    6  k get po
+    7  k scale deploy my-first-deployment --replicas=3
+    8  k get po
+    9  k scale deploy my-first-deployment --replicas=15
+   10  k get po
+   11  k scale deploy my-first-deployment --replicas=3
+   12  k get po
+   13  k set image deployment my-first-deployment nginx=httpd:alpine
+   14  k get deployment my-first-deployment
+   15  k get po
+   
+https://kubernetes.io/docs/concepts/workloads/pods/#using-pods
+
+
+
+Day 14 - 8May26
+append in ~/.bashrc
+alias k='kubectl' 
+alias kg='kubectl get' 
+alias kd='kubectl describe' 
+alias kdel='kubectl delete' 
+alias ka='kubectl apply -f' 
+alias kc='kubectl create' 
+alias ke='kubectl edit' 
+alias kgy='kubectl get -o yaml' 
+alias kl='kubectl logs' 
+alias kp='kubectl port-forward' 
+alias kx='kubectl exec -it'
+
+alias kgp='kubectl get pods' 
+alias kgpw='kubectl get pods -o wide' 
+alias kgpa='kubectl get pods --all-namespaces' 
+alias kgn='kubectl get nodes' 
+alias kgs='kubectl get services' 
+alias kgd='kubectl get deployments'
+
+
+deployment/services
+
+cat 5.deployment.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80
+
+  513  kubectl apply -f 5.deployment.yml 
+  514  kubectl get deploy
+  515  kubectl get rs
+  516  kubectl get pods
+  517  kubectl describe deployment nginx-deployment
+  518  kubectl describe rs nginx-deployment-647677fc66
+  519  kubectl get pods
+  
+  lab: create deployment with 4 replicas
+  done:Hemant,Elizabeth,Greeshma,Sandeep,Ashwini putty,Naresh,priyankaBhavitha
+      
+        image: nginx:1.14.2
+  528  kubectl get deploy,rs,pods
+  529  k descripbe pod nginx-deployment-647677fc66-rk9pp
+  530  k describe pod nginx-deployment-647677fc66-rk9pp
+  531  kubectl get deploy,rs,pods
+  532  kgp -o wide
+  533  kubectl set image deployment/nginx-deployment nginx=nginx:1.16.1 --record
+  534  kubectl get deploy,rs,pods
+  535  k rollout status deployment nginx-deployment
+  536  k rollout describe deployment nginx-deployment
+  537  k describe deployment nginx-deployment
+  538  k describe nginx-deployment-8d94c585f-w68rr
+  539  k describe pod nginx-deployment-8d94c585f-w68rr
+  540  k rollout history
+  541  k rollout history deployment/nginx-deployment
+          image: nginx:1.16.1
+  542  k apply -f 5.deployment.ym
+         image: nginx:latest 
+  543  kubectl get deploy,rs,pods
+  544  k rollout history deployment/nginx-deployment
+  545  k rollout undo deployment/nginx-deployment --to-revision=2
+  546  kubectl get deploy,rs,pods
+  547  kubectl scale deploy nginx-deployment --replicas=6
+  548  k rollout undo deployment/nginx-deployment --to-revision=2
+  549  kubectl get deploy,rs,pods
+
+
+lab: create deployment of nginx rolling update
+
+
+cat 6.deployment-recreate.yml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  strategy:
+    type: Recreate
+    #type: RollingUpdate
+
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest #latest #<<<nginx:1.16.1<<< #nginx:1.14.2
+        ports:
+        - containerPort: 80
+
+
+564  k apply -f 6.deployment-recreate.yml 
+  565  kubectl get deploy,rs,pods
+  566  kubectl rollout history deploy nginx-deployment
+  567  kubectl rollout history deploy nginx-deployment --revision=3
+  568  kubectl rollout history deploy nginx-deployment --revision=1
+  569  kubectl rollout history deploy nginx-deployment --revision=2
+  570  k describe deploy nginx-deployment
+  
+  
+
+
+LAB: create a deployment with 3 replicas of nginxdemos/hello
+done:priyanka.Nilesh,Ashwini putty,Naresh
+    
+    
+ClusterIP service
+
+cat 7.service-deploy.yml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: nginx
+      #env: prod
+  template:
+    metadata:
+      labels:
+        app: nginx
+        env: prod #will be used for service binding
+    spec:
+      containers:
+      - name: nginx
+        image: nginxdemos/hello #latest #<<<nginx:1.16.1<<< #nginx:1.14.2
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: democlusterip
+  namespace: default
+spec:
+  selector:
+    env: prod
+  type: ClusterIP
+  ports:
+  - name: demosport
+    protocol: TCP
+    port: 8090 #clusterip port
+    targetPort: 80
+    
+    LAB: use nginxdemos/hello:plain-text targetport:80, port 8191
+    done:Naresh,Elizabeth,Nilesh
+    
+    10.110.210.150
+    10.110.89.118 
+    10.106.178.91:8292
+    
+        
+        
+cat 9.nodeport-service-deployplaintext.yml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy-nodeport
+  labels:
+    app: nginx
+
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: nginx
+      #env: prod
+  template:
+    metadata:
+      labels:
+        app: nginx
+        env: qa #will be used for service binding
+    spec:
+      containers:
+      - name: nginx
+        image: nginxdemos/hello:plain-text #latest #<<<nginx:1.16.1<<< #nginx:1.14.2
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: democlusterip
+  namespace: default
+spec:
+  selector:
+    env: qa
+  #type: ClusterIP
+  type: NodePort
+  ports:
+  - name: demosport
+    protocol: TCP
+    port: 80 #service port
+    targetPort: 80 #pod port
+    nodePort: 30001 #port range 30000-32767
+
+
+  # 612  k apply -f 9.nodeport-service-deployplaintext.yml 
+  # 613  k get pods,svc
+  # 614  curl http://node1:30001
+  # 615  curl http://node2:30001
+
+LAB: nodeport
+
+Deploying a app 
+https://github.com/Azure-Samples/aks-store-demo/blob/main/aks-store-quickstart.yaml
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rabbitmq
+spec:
+  serviceName: rabbitmq
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: rabbitmq
+          image: mcr.microsoft.com/azurelinux/base/rabbitmq-server:3.13
+          ports:
+            - containerPort: 5672
+              name: rabbitmq-amqp
+            - containerPort: 15672
+              name: rabbitmq-http
+          env:
+            - name: RABBITMQ_DEFAULT_USER
+              value: "username"
+            - name: RABBITMQ_DEFAULT_PASS
+              value: "password"
+          resources:
+            requests:
+              cpu: 10m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          startupProbe:
+            tcpSocket:
+              port: 5672
+            failureThreshold: 30
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 5672
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 5672
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          volumeMounts:
+            - name: rabbitmq-enabled-plugins
+              mountPath: /etc/rabbitmq/enabled_plugins
+              subPath: enabled_plugins
+      volumes:
+        - name: rabbitmq-enabled-plugins
+          configMap:
+            name: rabbitmq-enabled-plugins
+            items:
+              - key: rabbitmq_enabled_plugins
+                path: enabled_plugins
+---
+apiVersion: v1
+data:
+  rabbitmq_enabled_plugins: |
+    [rabbitmq_management,rabbitmq_prometheus,rabbitmq_amqp1_0].
+kind: ConfigMap
+metadata:
+  name: rabbitmq-enabled-plugins
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+spec:
+  selector:
+    app: rabbitmq
+  ports:
+    - name: rabbitmq-amqp
+      port: 5672
+      targetPort: 5672
+    - name: rabbitmq-http
+      port: 15672
+      targetPort: 15672
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: order-service
+          image: ghcr.io/azure-samples/aks-store-demo/order-service:2.1.0
+          ports:
+            - containerPort: 3000
+          env:
+            - name: ORDER_QUEUE_HOSTNAME
+              value: "rabbitmq"
+            - name: ORDER_QUEUE_PORT
+              value: "5672"
+            - name: ORDER_QUEUE_USERNAME
+              value: "username"
+            - name: ORDER_QUEUE_PASSWORD
+              value: "password"
+            - name: ORDER_QUEUE_NAME
+              value: "orders"
+            - name: FASTIFY_ADDRESS
+              value: "0.0.0.0"
+          resources:
+            requests:
+              cpu: 1m
+              memory: 50Mi
+            limits:
+              cpu: 75m
+              memory: 128Mi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            failureThreshold: 5
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            failureThreshold: 3
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            failureThreshold: 5
+            initialDelaySeconds: 3
+            periodSeconds: 3
+      initContainers:
+        - name: wait-for-rabbitmq
+          image: busybox:1.37.0
+          command:
+            ["sh", "-c", "until nc -zv rabbitmq 5672; do echo waiting for rabbitmq; sleep 2; done;"]
+          resources:
+            requests:
+              cpu: 1m
+              memory: 50Mi
+            limits:
+              cpu: 75m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+  selector:
+    app: order-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-service
+  template:
+    metadata:
+      labels:
+        app: product-service
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: product-service
+          image: ghcr.io/azure-samples/aks-store-demo/product-service:2.1.0
+          ports:
+            - containerPort: 3002
+          env:
+            - name: AI_SERVICE_URL
+              value: "http://ai-service:5001/"
+          resources:
+            requests:
+              cpu: 1m
+              memory: 1Mi
+            limits:
+              cpu: 2m
+              memory: 20Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            failureThreshold: 3
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            failureThreshold: 5
+            initialDelaySeconds: 3
+            periodSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-service
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 3002
+      targetPort: 3002
+  selector:
+    app: product-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: store-front
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: store-front
+  template:
+    metadata:
+      labels:
+        app: store-front
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: store-front
+          image: ghcr.io/azure-samples/aks-store-demo/store-front:2.1.0
+          ports:
+            - containerPort: 8080
+              name: store-front
+          resources:
+            requests:
+              cpu: 1m
+              memory: 200Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            failureThreshold: 3
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            failureThreshold: 5
+            initialDelaySeconds: 3
+            periodSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: store-front
+spec:
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30002
+  selector:
+    app: store-front
+  type: NodePort #updated for lab scenario
+
+
+
+Day 15 - 11May26
+Pla login to LMS and complete 2nd mid assessment
+
+Kubernetes
+Control Node-(Master) - etcd[datastore], scheduler[allocates resources to nodes], control-manage[desiredstate,nodes, ],api server[centralhub of communication]
+WorkerNode - Kubelet[connects with master], kube-proxy [pod network management between nodes], container runtime[running pods]
+
+K8s api respources
+
+    Workload
+
+    pod: smallest res manageble, holds and runs the container image - res cpu,ram - network, storage - required-app
+
+    replicaset -  multiple copy of pod with same version with desired count
+
+    deployment - a workload with capabilities of having upgrade strategy - rollingupdate/recreate/blue-green..
+
+    Network
+
+    Storage
+
+
+https://kubernetes.io/docs/concepts/storage/volumes/#emptydir
+
+10.1emptydir.yml
+apiVersion: v1 
+kind: Pod
+metadata:
+  name: test-pod
+  labels:
+    app: "test"
+spec:
+  containers:
+  - name: container1
+    image: nginxdemos/hello:plain-text
+    ports:
+    - containerPort:  80
+      name:  http
+    volumeMounts:
+    - name: myapptemp
+      mountPath: /app123
+  volumes:
+    - name: myapptemp
+      emptyDir: 
+  restartPolicy: Always
+
+
+
+LAB: create nginxdemos/hello:plain-text based pod with /cache-temp volume with emptydir
+done:
+    
+apiVersion: v1 
+kind: Pod
+metadata:
+  name: nginxdemos/hello
+  labels:
+    app: "test"
+spec:
+  containers:
+  - name: container1
+    image: nginxdemos/hello:plain-text
+    ports:
+    - containerPort:  80
+      name:  http
+    volumeMounts:
+    - name: myapptemp
+      mountPath: /cache-temp
+  volumes:
+    - name: cache-temp
+      emptyDir: 
+  restartPolicy: Always
+
+
+bb-sv.yml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bbsvpod
+spec:
+  containers:
+  - image: busybox
+    name: busy
+    args: [/bin/sh, -c, 'while true; do echo $(date +"%Y-%m-%d %H:%M:%S") >> /busy/index.html; sleep 2; done']
+    volumeMounts:
+    - mountPath: /busy #from volume emtydir
+      name: test
+  - image: nginx
+    name: box
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - mountPath: /usr/share/nginx/html #map html folder with test volume-emtydir
+      name: test
+  volumes:
+  - name: test
+    emptyDir: {}
+
+#multicontainer shared volume mapping
+# kubectl apply -f bb-sv.yml
+# kubectl get pods
+# kubectl exec -it bbsvpod -c busy -- cat /busy/index.html
+# kubectl get pods all -o wide
+# curl http://podip
+# kubectl delete -f bb-sv.yml
+
+HOSTPATH
+
+hostpath.yml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hostpathpod
+spec:
+  containers:
+  - image: nginxdemos/hello:plain-text
+    name: test-container
+    volumeMounts:
+      - mountPath: "/usr/share/nginx/html"
+        name: test-hostpath
+  volumes:
+  - name: test-hostpath
+    hostPath:
+      path: /testdata
+      type: DirectoryOrCreate #if dir not available create new
+
+
+
+PV-PVC-POD-allinone
+
+allinpv.yml
+
+apiVersion: v1
+kind: PersistentVolume 
+metadata:
+  name: task-pv-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity: 
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: task-pv-claim
+spec:
+  storageClassName: manual
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: task-pv-pvc-pod
+spec:
+  containers:
+  - name: pv-container
+    image: nginx
+    ports:
+    - containerPort:  80
+      name:  http
+    volumeMounts:
+    - name: task-pv-storage
+      mountPath: /pvcclaimedvol1
+  volumes:
+    - name: task-pv-storage
+      persistentVolumeClaim:
+        claimName: task-pv-claim
+  restartPolicy: Always
+
+LAB: apply and check volume mounted in host
+done:
+
+
+PV-PVC-POD dynamic provisioning
+Pre req:    
+INstall NFS server on NODE2
+wget http://10.0.15.1/labs/k8s/12.nfsserverinstall.sh
+bash 12.nfsserverinstall.sh
+
+run the following command in both master and node1
+dnf install nfs-utils
+
+https://kubernetes.io/docs/concepts/storage/storage-classes/#nfs
+https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner
+
+
+apiVersion: v1 
+kind: Namespace 
+metadata: 
+  name: nfs-provisioner 
+--- 
+apiVersion: v1 
+kind: ServiceAccount 
+metadata: 
+  name: nfs-client-provisioner 
+  namespace: nfs-provisioner 
+--- 
+apiVersion: rbac.authorization.k8s.io/v1 
+kind: ClusterRole 
+metadata: 
+  name: nfs-client-provisioner-runner 
+rules: 
+  - apiGroups: [""] 
+    resources: ["persistentvolumes"] 
+    verbs: ["get", "list", "watch", "create", "delete"] 
+  - apiGroups: [""] 
+    resources: ["persistentvolumeclaims"] 
+    verbs: ["get", "list", "watch", "update"] 
+  - apiGroups: [""] 
+    resources: ["endpoints"] 
+    verbs: ["get", "list", "watch", "create", "update"] 
+  - apiGroups: [""] 
+    resources: ["services"] 
+    verbs: ["get", "list", "watch", "create"] 
+  - apiGroups: [""] 
+    resources: ["events"] 
+    verbs: ["create", "update"] 
+  - apiGroups: ["storage.k8s.io"] 
+    resources: ["storageclasses"] 
+    verbs: ["get", "list", "watch"] 
+  - apiGroups: ["coordination.k8s.io"] 
+    resources: ["leases"] 
+    verbs: ["get", "watch", "list", "create", "update"] 
+--- 
+apiVersion: rbac.authorization.k8s.io/v1 
+kind: ClusterRoleBinding 
+metadata: 
+  name: nfs-client-provisioner-runner 
+subjects: 
+  - kind: ServiceAccount 
+    name: nfs-client-provisioner 
+    namespace: nfs-provisioner 
+roleRef: 
+  kind: ClusterRole 
+  name: nfs-client-provisioner-runner 
+  apiGroup: rbac.authorization.k8s.io 
+--- 
+apiVersion: apps/v1 
+kind: Deployment 
+metadata: 
+  name: nfs-client-provisioner 
+  namespace: nfs-provisioner 
+spec: 
+  replicas: 1 
+  selector: 
+    matchLabels: 
+      app: nfs-client-provisioner 
+  template: 
+    metadata: 
+      labels: 
+        app: nfs-client-provisioner 
+    spec: 
+      serviceAccountName: nfs-client-provisioner 
+      containers: 
+        - name: nfs-client-provisioner 
+          image: registry.k8s.io/sig-storage/nfs-subdir-external-provisioner:v4.0.2 
+          volumeMounts: 
+            - name: nfs-client-root 
+              mountPath: /persistentvolumes 
+          env: 
+            - name: PROVISIONER_NAME 
+              value: example.com/nfs 
+            - name: NFS_SERVER 
+              value: 10.0.15.3 (node2 ip) 
+            - name: NFS_PATH 
+              value: /srv/nfs/kubedata 
+          securityContext: 
+            privileged: true 
+      volumes: 
+        - name: nfs-client-root 
+          nfs: 
+            server: 10.0.15.3 (node2ip) 
+            path: /srv/nfs/kubedata
+
+
+Day 16 - 12May26
+Ansible - Config management - mutable infra - IAC
+
+IMMUTABLE infra
+
+OS+PreReq+Dep+App >>>[Docker] image >>>Container ---- Dockerfile>>>Push images to DockerHUB
+[podman + buildah]
+
+Scalabilty, HA, Upgrade
+
+K8s - pod,rs, deployment
+network - clusterip, NodePort, LoadBalancer, INgress
+Storage - volume - path inside a pod
+emtydir{}, shared-empty{} - [lifecycle of the pod]
+HostPath - consumes a storage of the node /
+StorageClass   >>>driver or interface NFS, SAN-FC, ....
+PV - volume 
+PVC - to claim volume
+POD conusmed claim --maps to PV
+
+Dynamic Volume Provisioning
+dynpvcdeploy.yml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass 
+metadata:
+  name: nfs-dynamic
+provisioner: example.com/nfs
+reclaimPolicy: Delete 
+volumeBindingMode: Immediate
+---
+#if you apply this pvc, it will create a pv in example.com/nfs CSI
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nginx-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-dynamic
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+      volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: webdata
+  volumes:
+    - name: webdata
+      persistentVolumeClaim:
+        claimName: nginx-pvc
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx2
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+      volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: webdata
+  volumes:
+    - name: webdata
+      persistentVolumeClaim:
+        claimName: nginx-pvc
+
+
+LAB: deploy dynamic PV of 3 Gi 
+Done:Ashwini putty, Greeshma,Nilesh
+
+NameSpace
+default  -- Kubernetes includes this namespace so that you can start using your new cluster without first creating a namespace.
+kube-node-lease --     This namespace holds Lease objects associated with each node. Node leases allow the kubelet to send heartbeats so that the control plane can detect node failure.
+kube-public  ---   This namespace is readable by all clients (including those not authenticated). This namespace is mostly reserved for cluster usage, in case that some resources should be visible and readable publicly throughout the whole cluster. The public aspect of this namespace is only a convention, not a requirement.
+kube-system ---- The namespace for objects created by the Kubernetes system.
+
+Create multiple namespace  dev, qa, prod, proj1
+
+ 724  kubectl get namespaces
+  725  kubectl create ns devns
+  726  kubectl get namespaces
+  727  kubectl create ns qans
+  728  kubectl create ns prodns
+  729  kubectl get namespaces
+  730  kubectl get pods
+  732  kubectl run devpod --image=nginx -n devns
+  733  kubectl get pods
+  734  kubectl get pods -n devns
+  735  kubectl get pods -A
+  
+apiVersion: v1
+kind: Namespace
+metadata:
+  name:  testns
+
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  namespace: testns
+  name: myreplicaset1
+  labels:
+    app: myapp
+spec:
+  # modify replicas according to your case
+  replicas: 3
+  selector:
+    matchLabels:
+      app: l1
+  template:
+    metadata:
+      labels:
+        app: l1
+    spec:
+      containers:
+      - name: myapp
+        image: nginx:1.14.2 #first version>>>1.16.1
+
+ 
+  736  ka 15.1nsreplicast.yml 
+  737  kgp -n testns
+  738  kgp -n testns -o wide
+    
+
+ResouceQuota
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  namespace: devns
+  name: devrq
+spec:
+  hard:
+    pods: "2"
+    #requests.cpu: "1"
+    #requests.memory: "1Gi"
+    #limits.cpu: "2"
+    #limits.memory: "2Gi"
+    #requests.nvidia.com/gpu: 4
+
+
+LAB: restict pods max of 4 for prodns
+done: Naresh,Greeshma,Sandeep,Elizabeth,Nilesh,priyanka,Ashwini putty
+    
+    
+HELM Charts:
+ download link:   
+  https://get.helm.sh/helm-v4.1.4-linux-amd64.tar.gz  
+
+https://helm.sh/docs/intro/quickstart/
+https://helm.sh/docs/intro/install
+
+install HELM in master node:
+wget  http://10.0.15.1/labs/k8s/helm-v4.1.4.tar.gz
+tar -zxvf helm-v4.1.4.tar.gz
+mv linux-amd64/helm /usr/local/bin/helm [or] mv linux-amd64/helm /bin/helm
+
+done Greeshma,Ashwini putty
+
+
+[student@master k8s]$ helm create p1
+Creating p1
+[student@master k8s]$ tree p1
+p1
+├── charts
+├── Chart.yaml
+├── templates
+│   ├── deployment.yaml
+│   ├── _helpers.tpl
+│   ├── hpa.yaml
+│   ├── httproute.yaml
+│   ├── ingress.yaml
+│   ├── NOTES.txt
+│   ├── serviceaccount.yaml
+│   ├── service.yaml
+│   └── tests
+│       └── test-connection.yaml
+└── values.yaml
+
+
+  784  helm
+  785  helm list
+  786  helm create p1
+tree p1
+p1
+├── Chart.yaml
+├── templates
+│   ├── deployment.yaml
+│   └── service.yaml
+└── values.yaml
+
+cat p1/Chart.yaml 
+apiVersion: v2
+name: p1
+description: A Helm chart for Kubernetes
+
+# A chart can be either an 'application' or a 'library' chart.
+#
+# Application charts are a collection of templates that can be packaged into versioned archives
+# to be deployed.
+#
+# Library charts provide useful utilities or functions for the chart developer. They're included as
+# a dependency of application charts to inject those utilities and functions into the rendering
+# pipeline. Library charts do not define any templates and therefore cannot be deployed.
+type: application
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+# Versions are expected to follow Semantic Versioning (https://semver.org/)
+version: 0.1.0
+
+# This is the version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application. Versions are not expected to
+# follow Semantic Versioning. They should reflect the version the application is using.
+# It is recommended to use it with quotes.
+appVersion: "1.16.0"
+
+cat p1/values.yaml 
+# Default values for p1.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+ns: default
+name: default
+# This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
+rc: 1
+portno: 8999
+
+cat p1/templates/deployment.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: "{{ .Values.ns }}"
+  name: "nginx-{{ .Values.name }}" #nginx-devvv #nginx-proddd
+  labels:
+    app: nginx
+spec:
+  replicas: {{ .Values.rc }} #"" not req for numeric
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest #<<<nginx:1.16.1<<< #nginx:1.14.2
+        ports:
+        - containerPort: 80
+
+cat p1/templates/service.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: "cip-{{ .Values.name }}"
+  namespace: "{{ .Values.ns }}"
+spec:
+  selector:
+    env: prod
+  type: ClusterIP
+  ports:
+  - name: demosport
+    protocol: TCP
+    port: {{ .Values.portno }} #clusterip port
+    targetPort: 80
+
+
+ 782  helm install p1 p1/
+  783  helm list
+  784  k get all
+  #modify values.portno to 7999
+  788  helm upgrade p1 p1/
+  789  helm history p1
+  790  k get svc
+  #modify values.portno to 9999
+  791  helm upgrade p1 p1/
+  792  helm list
+  793  helm history p1
+  794  helm rollback p1 1 #rollback to 1st version
+  795  helm history p1
+helm history p1
+REVISION        UPDATED                         STATUS          CHART           APP VERSION     DESCRIPTION     
+1               Tue May 12 16:59:50 2026        superseded      p1-0.1.0        1.16.0          Install complete
+2               Tue May 12 17:02:19 2026        superseded      p1-0.1.0        1.16.0          Upgrade complete
+3               Tue May 12 17:03:21 2026        superseded      p1-0.1.0        1.16.0          Upgrade complete
+4               Tue May 12 17:04:45 2026        superseded      p1-0.1.0        1.16.0          Rollback to 1   
+5               Tue May 12 17:14:09 2026        deployed        p1-0.1.0        1.16.0          Rollback to 3 
+
+Lab: deply helm chart done: Elizabeth,Greeshma,Sandeep,Nilesh,Naresh,Priyanka
+    
+    
+  813  k get ns
+    816  k get pods -n devns
+  817  k get all -n devns
+  
+  cat p1/dev-values.yaml 
+# Default values for p1.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+ns: devns
+name: devvvvv
+# This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
+rc: 2
+portno: 19999
+  818  helm install devp1 p1/ -f p1/dev-values.yaml 
+  819  helm list
+  820  k get all -n devns
+  
+  cat p1/prod-values.yaml 
+# Default values for p1.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+ns: prodns
+name: proddd
+# This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
+rc: 4
+portno: 29999
+
+  821  helm install prodp1 p1/ -f p1/prod-values.yaml 
+  822  k get all -n prodns
+  823  help list
+  824  helm list
+  825  helm upgrade prodp1 p1/ -f p1/prod-values.yaml 
+  826  helm list
+
+Day17 - 13May26
+
+https://helm.sh/docs/topics/charts/
+
+
+wordpress/
+  Chart.yaml          # A YAML file containing information about the chart
+  LICENSE             # OPTIONAL: A plain text file containing the license for the chart
+  README.md           # OPTIONAL: A human-readable README file
+  values.yaml         # The default configuration values for this chart
+  values.schema.json  # OPTIONAL: A JSON Schema for imposing a structure on the values.yaml file
+  charts/             # A directory containing any charts upon which this chart depends.
+  crds/               # Custom Resource Definitions
+  templates/          # A directory of templates that, when combined with values,
+                      # will generate valid Kubernetes manifest files.
+  templates/NOTES.txt # OPTIONAL: A plain text file containing short usage notes
+
+
+
+
+Monitoring
+Install Prometheus server in Master
+
+https://prometheus.io/assets/docs/architecture.svg
+https://github.com/prometheus/prometheus/releases/download/v3.11.3/prometheus-3.11.3.linux-amd64.tar.gz
+
+
+Lab: install Prometheus server
+wget http://10.0.15.1/labs/monitoring/prometheus-3.11.3.linux-amd64.tar.gz
+tar xvfz prometheus-*.tar.gz
+
+    prometheus-3.11.3.linux-amd64/
+
+    prometheus-3.11.3.linux-amd64/LICENSE
+
+    prometheus-3.11.3.linux-amd64/NOTICE
+
+    prometheus-3.11.3.linux-amd64/promtool
+
+    prometheus-3.11.3.linux-amd64/prometheus
+
+    prometheus-3.11.3.linux-amd64/prometheus.yml
+
+
+cd prometheus-*
+done: Ashwini Putty, Naresh ,Nilesh, Greeshma,Sandeep,Prince Melkias,priyanka,Elizabeth,Hemant
+
+
+edit prometheus.yml
+    static_configs:
+      - targets: ["localhost:9090","node1:9100","10.0.15.3:9100"]
+
+start with
+./prometheus [execute]
+
+launch http://localhost:9090
+
+Install Node-exporter on node1 & Node2
+wget http://10.0.15.1/labs/monitoring/node_exporter-1.11.1.linux-amd64.tar.gz
+tar xvfz node_exporter-1.11.1.linux-amd64.tar.gz
+cd node*
+start nodeexporter with 
+./node-exporter
+
+Observe all system health is green prometheus server webUI
+
+Lab done:Naresh,Elizabeth,Nilesh,Hemant
+    
+
+
+
+CPU Metrics 
+
+    Per-second average CPU time spent in user mode over the last 5 minutes:
+    rate(node_cpu_seconds_total{mode="user"}[5m])
+    Total CPU utilization percentage (sum of all modes/CPUs):
+    100 * (1 - rate(node_cpu_seconds_total{mode="idle"}[5m]))
+    Per-second average CPU time spent in system mode over the last 10 minutes:
+    rate(node_cpu_seconds_total{mode="system"}[10m]) 
+
+Memory Metrics
+
+    Total available memory in bytes:
+    node_memory_MemAvailable_bytes
+    Total memory utilization percentage:
+    100 * (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes 
+
+Filesystem & Disk Metrics
+
+    Available filesystem space in bytes (useful for capacity planning):
+    node_filesystem_avail_bytesres_type=auto&g1.res_density=medium&g1.display_mode=lines&g1.show_exemplars=0
+    Disk I/O operations per second (reads + writes) over the last minute:
+    rate(node_disk_reads_completed_total[1m]) + rate(node_disk_writes_completed_total[1m]) 
+
+Network Metrics
+
+    Average network traffic received in bytes per second over the last 5 minutes:
+    rate(node_network_receive_bytes_total[5m])
+    Average network traffic transmitted in bytes per second over the last 5 minutes:
+    rate(node_network_transmit_bytes_total[5m]) 
+
+System Load & Uptime
+
+    System load average over the last 1 minute:
+    node_load1
+    System uptime in seconds:
+    node_time_seconds - node_boot_time_seconds 
+
+node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes
+
+
+Install Grafana in Master
+wget http://10.0.15.1/labs/monitoring/grafana_13.0.1_24542347077_linux_amd64.rpm
+\
+ 865  sudo dnf localinstall grafana_13.0.1_24542347077_linux_amd64.rpm 
+  866  sudo /bin/systemctl daemon-reload
+  867  sudo /bin/systemctl enable grafana-server.service
+  868  sudo /bin/systemctl start grafana-server.service
+
+
+done:
+    Elizabeth , Prince Melkias, Naresh,priyanka,Bhavitha,Nilesh,Sandeep,Ashwini putty,Greeshma,Hemant
+
+
+
+After login to grafana, add data source, add dashboard-import ID 1860
+
+
+INstall Prometheus and grafana in k8s cluster
+
+
+Kubernetes Monitoring Lab: Prometheus + Grafana
+Objective: Deploy a production-style monitoring stack in Kubernetes using the
+kube-prometheus-stack Helm chart and visualize metrics in Grafana.
+Prerequisites
+• Working Kubernetes cluster (1 master + 2 workers recommended)
+
+kubectl configured
+• Helm installed
+• Internet access to pull container images
+
+## Step 1 – Add Helm Repository
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+## Step 2 – Create Monitoring Namespace
+kubectl create namespace monitoring
+
+## Step 3 – Install kube-prometheus-stack
+helm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring
+
+## Step 4 – Verify Monitoring Pods
+
+kubectl get pods -n monitoring
+Expected Components
+• Prometheus Server
+• Grafana
+• Alertmanager
+• Node Exporter (DaemonSet)
+• kube-state-metrics
+
+## Step 5.1 – Access Grafana (clusterip)
+kubectl get svc/monitoring-grafana -n monitoring
+Open browser: http://monitoring-grafana-clusterip:80
+## or ##
+## Step 5.2 – Access Grafana (Port Forward)
+kubectl port-forward svc/monitoring-grafana 3000:80 -n monitoring
+Open browser: http://localhost:3000
+
+## Step 6 – Get Grafana Admin Password
+kubectl --namespace monitoring get secrets monitoring-grafana -o jsonpath="{.data.admin-password}" | base64 -d ; echo
+
+## Step 7 – Verify Prometheus Metrics
+
+kubectl port-forward svc/monitoring-kube-prometheus-prometheus 9090:9090 -n monitoring
+• Open browser: http://localhost:9090
+• Test query: up
+
+## Step 8 – Generate CPU Load (Test Monitoring)
+
+kubectl run cpu-stress --image=polinux/stress --restart=Never -- stress --cpu 2 --timeout 120
+
+## Step 9 – Observe Metrics
+
+kubectl top pod
+kubectl top node
+
+• Open Grafana dashboards and observe CPU spike
+
+## Cleanup
+
+kubectl delete pod cpu-stress
+
+helm uninstall monitoring -n monitoring
+
+kubectl delete namespace monitoring
+
+Dashboard ID 15661
+
+
+Day 18 - 14May26
+
+This is the exact pattern used in real enterprise environments:
+
+* Frontend container → serves UI
+* Backend container → exposes APIs
+* Database container → stores data
+* Kubernetes → orchestrates everything
+
+If you understand this model properly, you understand:
+
+* Microservices basics
+* Container networking
+* Service discovery
+* Internal vs external ports
+* Kubernetes deployments and services
+* DevOps deployment workflow
+
+This lab intentionally keeps the application simple while enabling production-grade architecture concepts.
+
+---
+
+# Architecture
+
+
+Browser
+   |
+   v
+Frontend Container (NGINX)
+   |
+   v
+Backend API Container (Node.js)
+   |
+   v
+MongoDB Container
+
+
+Kubernetes communication:
+
+
+Frontend Pod ---> Backend Service ---> Backend Pod
+Backend Pod ---> MongoDB Service ---> MongoDB Pod
+
+
+---
+
+# Project Structure
+
+
+fullstack-k8s-demo/
+│
+├── frontend/
+│   ├── index.html
+│   ├── script.js
+│   ├── Dockerfile
+│   └── nginx.conf
+│
+├── backend/
+│   ├── server.js
+│   ├── package.json
+│   └── Dockerfile
+│
+├── k8s/
+│   ├── mongodb-deployment.yaml
+│   ├── backend-deployment.yaml
+│   ├── frontend-deployment.yaml
+│   └── ingress-or-nodeport.yaml
+│
+└── README.md
+
+
+---
+
+# STEP 1 — FRONTEND APPLICATION
+
+## frontend/index.html
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kubernetes Full Stack Demo</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f4f4;
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .box {
+            background: white;
+            padding: 30px;
+            width: 400px;
+            margin: auto;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px gray;
+        }
+
+        input {
+            padding: 10px;
+            width: 80%;
+        }
+
+        button {
+            padding: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h1>K8s Demo Application</h1>
+
+    <input type="text" id="message" placeholder="Enter message">
+    <br>
+    <button onclick="sendMessage()">Send</button>
+
+    <h3>Messages from Backend</h3>
+    <ul id="messages"></ul>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
+
+
+---
+
+## frontend/script.js
+
+const backendURL = "/api/messages";
+
+async function loadMessages() {
+    const response = await fetch(backendURL);
+    const data = await response.json();
+
+    const list = document.getElementById("messages");
+    list.innerHTML = "";
+
+    data.forEach(item => {
+        const li = document.createElement("li");
+        li.innerText = item.text;
+        list.appendChild(li);
+    });
+}
+
+async function sendMessage() {
+    const message = document.getElementById("message").value;
+
+    await fetch(backendURL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text: message })
+    });
+
+    document.getElementById("message").value = "";
+
+    loadMessages();
+}
+
+loadMessages();
+
+
+---
+
+## frontend/nginx.conf
+
+server {
+    listen 80;
+
+    location / {
+        root /usr/share/nginx/html;
+        index index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://backend-service:3000/;
+    }
+}
+
+
+---
+
+## frontend/Dockerfile
+
+FROM nginx:alpine
+COPY index.html /usr/share/nginx/html/
+COPY script.js /usr/share/nginx/html/
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+
+
+---
+
+# STEP 2 — BACKEND APPLICATION
+
+## backend/package.json
+
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "server.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "mongodb": "^5.7.0"
+  }
+}
+
+
+---
+
+## backend/server.js
+
+const express = require('express');
+const cors = require('cors');
+const { MongoClient } = require('mongodb');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+const mongoURL = 'mongodb://mongodb-service:27017';
+const client = new MongoClient(mongoURL);
+
+let collection;
+
+async function start() {
+    await client.connect();
+
+    const db = client.db('demoapp');
+    collection = db.collection('messages');
+
+    console.log('Connected to MongoDB');
+}
+
+start();
+
+app.get('/messages', async (req, res) => {
+    const data = await collection.find().toArray();
+    res.json(data);
+});
+
+app.post('/messages', async (req, res) => {
+    await collection.insertOne({
+        text: req.body.text
+    });
+
+    res.json({
+        status: 'saved'
+    });
+});
+
+app.listen(3000, () => {
+    console.log('Backend running on port 3000');
+});
+
+
+---
+
+## backend/Dockerfile
+
+FROM node:20-alpine
+WORKDIR /app
+COPY package.json .
+RUN npm install
+
+COPY server.js .
+
+EXPOSE 3000
+
+CMD ["node", "server.js"]
+
+
+---
+
+# STEP 3 — BUILD DOCKER IMAGES
+
+## Build Frontend Image
+
+bash
+cd frontend
+
+docker build -t frontend-demo:v1 .
+
+
+---
+
+## Build Backend Image
+
+bash
+cd ../backend
+
+docker build -t backend-demo:v1 .
+
+
+---
+
+# STEP 4 — TEST LOCALLY USING DOCKER NETWORK [OPTIONAL]------------------------------
+
+## Create Docker Network
+
+bash
+docker network create demo-network
+
+
+---
+
+## Start MongoDB
+
+bash
+docker run -d \
+--name mongodb \
+--network demo-network \
+mongo:7
+
+
+---
+
+## Start Backend
+
+bash
+docker run -d \
+--name backend \
+--network demo-network \
+-p 3000:3000 \
+backend-demo:v1
+
+
+---
+
+## Start Frontend
+
+bash
+docker run -d \
+--name frontend \
+--network demo-network \
+-p 8080:80 \
+frontend-demo:v1
+
+
+-----------------------------------------------------------------------------------------------------
+
+# STEP 5 — PUSH IMAGES TO REGISTRY
+
+## Tag Images
+
+Replace YOUR_DOCKERHUB_USERNAME.
+
+bash
+docker tag frontend-demo:v1 YOUR_DOCKERHUB_USERNAME/frontend-demo:v1
+
+docker tag backend-demo:v1 YOUR_DOCKERHUB_USERNAME/backend-demo:v1
+
+
+---
+
+## Push Images
+
+bash
+docker push YOUR_DOCKERHUB_USERNAME/frontend-demo:v1
+
+docker push YOUR_DOCKERHUB_USERNAME/backend-demo:v1
+
+
+---
+
+# STEP 6 — KUBERNETES DEPLOYMENT
+
+# MongoDB Deployment
+
+## k8s/mongodb-deployment.yaml
+
+yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+
+  template:
+    metadata:
+      labels:
+        app: mongodb
+
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:7
+        ports:
+        - containerPort: 27017
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+spec:
+  selector:
+    app: mongodb
+
+  ports:
+  - port: 27017
+    targetPort: 27017
+
+
+---
+
+# Backend Deployment
+
+## k8s/backend-deployment.yaml
+
+yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: backend
+
+  template:
+    metadata:
+      labels:
+        app: backend
+
+    spec:
+      containers:
+      - name: backend
+        image: YOUR_DOCKERHUB_USERNAME/backend-demo:v1
+
+        ports:
+        - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: backend
+
+  ports:
+  - port: 3000
+    targetPort: 3000
+
+
+---
+
+# Frontend Deployment
+
+## k8s/frontend-deployment.yaml
+
+yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: frontend
+
+  template:
+    metadata:
+      labels:
+        app: frontend
+
+    spec:
+      containers:
+      - name: frontend
+        image: YOUR_DOCKERHUB_USERNAME/frontend-demo:v1
+
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  type: NodePort
+
+  selector:
+    app: frontend
+
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30080
+
+
+---
+
+# STEP 7 — DEPLOY TO KUBERNETES
+
+## Apply All Files
+
+bash
+kubectl apply -f k8s/
+
+
+---
+
+## Verify Pods
+
+bash
+kubectl get pods
+
+
+Expected:
+frontend-xxxxx   Running
+backend-xxxxx    Running
+mongodb-xxxxx    Running
+---
+
+## Verify Services
+
+bash
+kubectl get svc
+
+
+Expected:
+
+
+frontend-service
+backend-service
+mongodb-service
+
+
+---
+
+# STEP 8 — ACCESS APPLICATION
+
+Open browser:
+
+
+http://NODE-IP:30080
+
+
+Example:
+http://node1:30080
+
+
+---
+
+# How Kubernetes Networking Works Here
+## Internal Cluster Communication
+Frontend talks to backend using:
+http://backend-service:3000
+Backend talks to MongoDB using:
+mongodb-service:27017
+This is Kubernetes DNS.
+Pods do NOT communicate using Pod IPs in production.
+
+Always use:
+
+* Services
+* DNS names
+* Load balancing
+* Service discovery
+
+That is the enterprise standard.
+
+---
+
+# Important Real-World Improvements
+This demo is intentionally simplified.
+Real production systems should include:
+
+## 1. Persistent Volumes
+
+MongoDB data will disappear if Pod dies.
+
+Use:
+
+* PV
+* PVC
+* StorageClass
+
+---
+
+## 2. Secrets
+
+Never hardcode:
+
+* passwords
+* database URLs
+* API keys
+
+Use:
+
+yaml
+kind: Secret
+
+
+---
+
+## 3. ConfigMaps
+
+Move configuration outside image.
+
+---
+
+## 4. Health Checks
+
+Use:
+
+yaml
+livenessProbe
+readinessProbe
+
+
+---
+
+## 5. Ingress Controller
+
+Instead of NodePort.
+
+Production standard:
+Ingress/LoadBalancer + TLS + DNS
+
+
+---
+
+# Troubleshooting Commands
+
+## Check Logs
+
+bash
+kubectl logs deployment/frontend
+
+kubectl logs deployment/backend
+
+kubectl logs deployment/mongodb
+
+
+---
+
+## Enter Pod
+
+bash
+kubectl exec -it deployment/backend -- sh
+
+
+---
+
+## Test Backend from Frontend Pod
+
+bash
+apk add curl
+
+curl http://backend-service:3000/messages
+
+
+---
+
+## Test MongoDB Connectivity
+
+bash
+kubectl exec -it deployment/backend -- sh
+
+ping mongodb-service
+
+
+---
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+###deploy Jenkins server in K8s cluster
+🏗 High-Level Architecture
+Jenkins Controller (Pod/StatefulSet)
+        ↓
+Kubernetes Plugin
+        ↓
+Dynamic Agent Pods
+        ↓
+Job Execution
+        ↓
+Pods auto-deleted
+1️⃣ Beginner View – What We’re Building
+
+When a pipeline runs:
+Jenkins talks to Kubernetes API
+Kubernetes creates a temporary Pod
+Job runs inside Pod
+Pod is destroyed
+Clean environment every time.
+
+2️⃣ Practitioner – Step-by-Step Clean Setup
+
+Best practice even for labs: install dynamic provisioner.
+If Using Bare Metal / VMs → Install Local Path Provisioner
+## Pre-req ##
+**Install lightweight provisioner:**
+kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+
+Verify:
+kubectl get storageclass
+You should see:   local-path (default)
+If not default:
+
+kubectl patch storageclass local-path -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+
+✅ Step 1 – Install Jenkins Inside Kubernetes (Recommended)
+Create namespace:
+kubectl create namespace jenkins
+
+Install using Helm.
+Add repo:
+helm repo add jenkins https://charts.jenkins.io
+helm repo update
+
+Install:
+helm install jenkins jenkins/jenkins --namespace jenkins --create-namespace
+
+Check:
+kubectl get pods -n jenkins
+Wait until running.
+
+Get admin password:
+kubectl exec -n jenkins svc/jenkins -c jenkins -- cat /run/secrets/additional/chart-admin-password
+
+Access via [if using port-forwarding]:
+kubectl port-forward svc/jenkins 8181:8080 -n jenkins
+
+Open:
+http://localhost:8181
+
+✅ Step 2 – Install Kubernetes Plugin
+
+Inside Jenkins UI:
+Manage Jenkins → Plugins → Available
+Search: Kubernetes  >>>Install >>Restart
+
+✅ Step 3 – Configure Kubernetes Cloud (In-Cluster Mode)
+Go:
+Manage Jenkins → Clouds → Add Cloud → Kubernetes
+Fill:
+Name: k8s
+Kubernetes URL: https://kubernetes.default.svc
+Namespace: jenkins
+Credentials: (leave default — it will use in-cluster service account)
+Click: Test Connection
+Should say: Connection successful
+
+No TLS problems because it's inside cluster.
+
+✅ Step 4 – Add Pod Template
+
+Inside same Cloud:  Add Pod Template:
+Name: jenkins-agent
+Namespace: jenkins
+Labels: k8s-agent
+Add Container:
+    Name: jnlp
+    Image: jenkins/inbound-agent:latest
+    Working Directory: /home/jenkins
+Set resource requests:
+CPU request: 500m
+Memory request: 512Mi
+Save.
+
+✅ Step 5 – Test Pipeline
+
+Create New Pipeline:
+
+pipeline {
+    agent {
+        kubernetes {
+            label 'k8s-agent'
+        }
+    }
+    stages {
+        stage('Test') {
+            steps {
+                sh 'echo Running in Kubernetes'
+                sh 'hostname'
+            }
+        }
+    }
+}
+
+Run build. 
+In terminal:
+
+kubectl get pods -n jenkins -w

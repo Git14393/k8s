@@ -1,1 +1,9 @@
 https://killercoda.com/kubernetes 
+<<<<<<< HEAD
+=======
+https://helm.sh/docs/topics/charts/  #chart /helm
+
+#Monitoring
+https://prometheus.io/assets/docs/architecture.svg
+https://github.com/prometheus/prometheus/releases/download/v3.11.3/prometheus-3.11.3.linux-amd64.tar.gz
+>>>>>>> 4ef9634 (4th commit)
